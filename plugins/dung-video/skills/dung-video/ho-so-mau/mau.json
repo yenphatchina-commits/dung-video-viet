@@ -1,0 +1,17 @@
+{
+ "_ghi_chu": "Mẫu hồ sơ. Đổi tên kênh, người dẫn, từ riêng và bảng sửa chữ cho đúng kênh của bạn.",
+ "ten_kenh": "Tên cơ sở của bạn",
+ "nguoi_dan": "Tên người dẫn",
+ "tu_rieng": ["xoa bóp", "bấm huyệt"],
+ "sua_tu": {"so bóp": "xoa bóp", "bấm huyện": "bấm huyệt", "bấm nguyện": "bấm huyệt"},
+ "mau_nhan": "#FFD400",
+ "mau_canh_bao": "#E5383B",
+ "bia_giay": 0.8,
+ "chu_mo_dau_giay": 0.9,
+ "phu_de": {"tu-van": true, "bai-tap": false},
+ "am_luong_lufs": -16,
+ "logo": {"tep": "", "goc": "tren-phai", "rong": 0.14, "mo": 0.9},
+ "intro": "", "intro_giay": 1.5,
+ "outro": "", "outro_giay": 2.0,
+ "sfx_tu_dong": true
+}

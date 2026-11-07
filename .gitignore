@@ -1,0 +1,8 @@
+# Không bao giờ đưa lên GitHub
+*.pem
+*.key
+da-ban.csv
+ban-quyen.json
+cong-cu-nguoi-ban/
+.DS_Store
+__pycache__/
