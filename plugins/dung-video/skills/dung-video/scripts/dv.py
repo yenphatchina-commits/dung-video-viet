@@ -7,6 +7,8 @@
     dv.py ho-so tao <tên> | ds            tạo / liệt kê hồ sơ kênh
     dv.py du-an <tên>                     in đường dẫn thư mục dự án mới
     dv.py nhac                            liệt kê nhạc của người dùng + nhạc mẫu tự tạo
+    dv.py hoc <thư mục> --mau <video mẫu> [--tho <bản thô>]   học phong cách từ video mẫu
+    dv.py phong-cach [ds | xem <tên> | xoa <tên>]              các phong cách đã học
     dv.py doc <dự án> --video <tệp>… [--phu <cảnh minh hoạ>…] [--ho-so <tên>]
     dv.py dung <dự án> [--nhap]
     dv.py nang-cap                        hướng dẫn lấy bản mới
@@ -83,6 +85,25 @@ def main():
         print(f"Thư mục nhạc của bạn: {thu}")
         print("\n".join("  - " + os.path.join(thu, f) for f in ds) or "  (trống — chép nhạc có quyền dùng vào đây)")
         print("Nhạc mẫu tự tạo (không bản quyền): mau:nhe-nhang · mau:tuoi-sang · mau:tram")
+    elif lenh == "hoc":
+        chay("hoc.py", *con)
+    elif lenh == "phong-cach":
+        thu = os.path.join(NHA, "phong-cach")
+        os.makedirs(thu, exist_ok=True)
+        if con[:1] == ["xem"] and len(con) > 1:
+            print(open(os.path.join(thu, con[1] + ".json"), encoding="utf-8").read())
+        elif con[:1] == ["xoa"] and len(con) > 1:
+            os.remove(os.path.join(thu, con[1] + ".json"))
+            print("Đã xoá phong cách", con[1])
+        else:
+            ds = sorted(f[:-5] for f in os.listdir(thu) if f.endswith(".json"))
+            for t in ds:
+                try:
+                    mo_ta = json.load(open(os.path.join(thu, t + ".json"), encoding="utf-8")).get("mo_ta", "")
+                except (OSError, ValueError):
+                    mo_ta = "(tệp lỗi)"
+                print(f"  - {t}: {mo_ta}")
+            print("" if ds else "  (chưa học phong cách nào)")
     elif lenh == "doc":
         bao_ban_moi()
         chay("doc.py", *con)

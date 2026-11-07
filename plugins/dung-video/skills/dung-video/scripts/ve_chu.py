@@ -15,6 +15,10 @@ TRANG = (255, 255, 255)
 
 @lru_cache(maxsize=64)
 def font(dam, co):
+    if dam.startswith("nghieng"):                 # chữ có chân nghiêng (Playfair Display Italic, biến thể độ đậm)
+        f = ImageFont.truetype(os.path.join(C.FONT, "PlayfairDisplay-Italic.ttf"), int(co))
+        f.set_variation_by_axes([800 if dam == "nghieng-dam" else 600])
+        return f
     ten = {"vua": "Medium", "nua": "SemiBold", "dam": "Bold", "rat": "ExtraBold", "den": "Black"}[dam]
     return ImageFont.truetype(os.path.join(C.FONT, f"BeVietnamPro-{ten}.ttf"), int(co))
 
@@ -84,7 +88,18 @@ def vai(ten, hs):
         "nhan-do":    ("rat", 42, True, mau(canh), TRANG + (255,), 24, 10, 14, 0, False, 0),
         "dau-muc":    ("den", 50, True, None, mau(nhan), 0, 0, 0, 0, True, 3),
         "chu":        ("dam", 42, False, None, TRANG + (255,), 0, 0, 0, 0, True, 3),
+        # chữ có chân nghiêng — dùng được ở mọi kiểu khối
+        "tieu-nghieng":      ("nghieng-dam", 92, False, None, TRANG + (255,), 0, 0, 0, 0, True, 0),
+        "tieu-nghieng-vang": ("nghieng-dam", 92, False, None, mau(nhan), 0, 0, 0, 0, True, 0),
+        "nho-gian":          ("nua", 26, True, None, (255, 255, 255, 220), 0, 0, 0, 5, True, 0),
+        "nho-vang":          ("nua", 28, True, None, mau(nhan), 0, 0, 0, 4, True, 0),
     }
+    if hs.get("font_tieu_de") == "co-chan-nghieng":   # phong cách đã học: tiêu đề & dòng chính dùng chữ có chân
+        doi = {"tieu-trang": "tieu-nghieng", "tieu-vang": "tieu-nghieng-vang"}
+        if ten in doi:
+            return V[doi[ten]]
+        if ten == "to":
+            return ("nghieng-dam", 74, False, None, TRANG + (255,), 0, 0, 0, 0, False, 0)
     return V[ten]
 
 
@@ -126,7 +141,8 @@ def dan_khoi(el, hs, rong_max):
     for x in ds:
         x["x"] += le
         x["y"] += le
-    return {"w": W_ + 2 * le, "h": H_ + 2 * le, "le": le, "dong": ds, "kieu": kieu, "can": can}
+    return {"w": W_ + 2 * le, "h": H_ + 2 * le, "le": le, "dong": ds, "kieu": kieu, "can": can,
+            "nen_trong": el.get("nen") == "trong"}
 
 
 def ve_khoi(bc, hs, hien=None):
@@ -136,7 +152,8 @@ def ve_khoi(bc, hs, hien=None):
     if bc["kieu"] == "the-den":
         d = ImageDraw.Draw(im)
         d.rounded_rectangle([le, le, bc["w"] - le - 1, bc["h"] - le - 1], radius=26,
-                            fill=(12, 12, 12, 228), outline=mau(hs["mau_nhan"]), width=5)
+                            fill=None if bc.get("nen_trong") else (12, 12, 12, 228),
+                            outline=mau(hs["mau_nhan"]), width=4 if bc.get("nen_trong") else 5)
     bong = Image.new("RGBA", im.size, (0, 0, 0, 0))
     db = ImageDraw.Draw(bong)
     d = ImageDraw.Draw(im)
@@ -191,7 +208,7 @@ def dan_phu_de(tu, rong_max, co=56):
 def ve_phu_de(bc, hs, dang_noi):
     im = Image.new("RGBA", (bc["w"], bc["h"]), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    vang = mau(hs["mau_nhan"])
+    vang = mau(hs.get("phu_de_mau_noi") or hs["mau_nhan"])
     for i, (x, y, w) in enumerate(bc["vt"]):
         d.text((x, y), w["w"], font=bc["f"], fill=vang if i == dang_noi else (255, 255, 255, 255),
                stroke_width=7, stroke_fill=(0, 0, 0, 255))

@@ -43,6 +43,9 @@ Ghi `"theo": "ra"` nếu muốn tính theo giây thành phẩm (dùng cho khối
 | `tieu-de` | Tiêu đề lớn giữa khung: câu mở, cảnh báo quan trọng, câu kết | `tieu-trang` · `tieu-vang` |
 | `nhan` | Nhãn/danh sách xếp chồng, hiện dần | `nhan-vang` · `nhan-den` · `nhan-do` (cảnh báo) · `dau-muc` (đầu mục chữ màu) · `chu` |
 
+- Thêm cho khối: `"lam_toi": 0.45` (làm tối cả khung khi khối hiện — hợp thẻ tiêu đề kiểu quảng cáo),
+  `"nen": "trong"` (thẻ `the-den` chỉ còn viền màu nhấn, không nền).
+- Vai thêm: `tieu-nghieng`, `tieu-nghieng-vang` (chữ có chân nghiêng), `nho-gian` (dòng nhỏ chữ hoa giãn), `nho-vang`.
 - Mỗi dòng có thể có `"t0"` riêng → hiện dần (khối giữ nguyên chỗ, không nhảy).
 - `t1` bỏ trống = 3 giây. Khối nên kéo tới khi lời chuyển sang ý khác.
 - `vi_tri` chỉ là ưu tiên; máy vẫn tránh mặt, động tác, vùng an toàn và các khối khác.

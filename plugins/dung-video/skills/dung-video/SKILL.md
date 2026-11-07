@@ -1,6 +1,6 @@
 ---
 name: dung-video
-description: Dựng video dọc 9:16 tiếng Việt (TikTok, Reels, Shorts) từ clip quay điện thoại cho người không biết edit — tự nghe lời, cắt khoảng ngừng, bỏ câu nói hỏng, thêm chữ chốt ý tránh mặt và tránh động tác, phụ đề tô chữ đang nói, chèn cảnh minh hoạ (B-roll), nhạc nền tự nhỏ khi có lời, hiệu ứng âm thanh, logo, intro/outro, phóng to đoạn quan trọng, tăng tốc, giảm ồn, ảnh bìa phủ giây đầu, chuẩn âm lượng, xuất MP4 dọc và thêm khổ ngang YouTube / 4:5 Facebook. Dùng khi người dùng đưa video và nói "dựng", "edit", "làm video", "cắt video", "thêm chữ", "làm phụ đề", "làm ảnh bìa", hoặc "cài đặt dựng video", "kích hoạt mã", "kiểm tra máy", "nâng cấp skill".
+description: Dựng video dọc 9:16 tiếng Việt (TikTok, Reels, Shorts) từ clip quay điện thoại cho người không biết edit — tự nghe lời, cắt khoảng ngừng, bỏ câu nói hỏng, thêm chữ chốt ý tránh mặt và tránh động tác, phụ đề tô chữ đang nói, chèn cảnh minh hoạ (B-roll), nhạc nền tự nhỏ khi có lời, hiệu ứng âm thanh, logo, intro/outro, phóng to đoạn quan trọng, tăng tốc, giảm ồn, ảnh bìa phủ giây đầu, chuẩn âm lượng, xuất MP4 dọc và thêm khổ ngang YouTube / 4:5 Facebook. Dùng khi người dùng đưa video và nói "dựng", "edit", "làm video", "cắt video", "thêm chữ", "làm phụ đề", "làm ảnh bìa", hoặc "cài đặt dựng video", "kích hoạt mã", "kiểm tra máy", "nâng cấp skill", "học phong cách video này", "dựng theo phong cách …".
 ---
 
 # Dựng video
@@ -72,7 +72,20 @@ dv.py dung <dự án>            (bản thật; --nhap = bản xem nhanh 540p)
 Giao: đường dẫn video, ảnh bìa `ra/bia.jpg`, 3–5 dòng tóm tắt (dài bao nhiêu, đã bỏ gì, chữ gì) + những chỗ người dùng nên tự xem.
 Người dùng chê ("chữ to quá", "cắt mất chữ", "chữ đè tay") → sửa đúng chỗ đó trong `ke-hoach.json` rồi dựng lại.
 
-## 6. Khác
+## 6. Học phong cách từ video mẫu
+Khi người dùng đưa video họ thích và nói "học phong cách", "làm giống video này":
+1. Hỏi tên phong cách (ngắn, không dấu, vd `soi-dong`) và có **bản thô** của video đó không (có thì học chính xác chỗ cắt).
+2. `dv.py hoc <thư mục dự án> --mau <video mẫu> [--tho <bản thô>] --ho-so <tên>` (thư mục dự án lấy từ `dv.py du-an "hoc-<tên>"`).
+3. Đọc `hoc/tom-tat-hoc.md`, **nhìn** `hoc/bang-24.jpg` và `hoc/khung-1..5.jpg`. Đọc `tai-lieu/phong-cach.md` rồi viết
+   `~/.dung-video/phong-cach/<tên>.json`. Chỉ ghi điều thấy được hoặc đo được; chỗ không chắc (vd có nhạc không) thì hỏi.
+4. Báo lại người dùng 4–6 dòng dễ hiểu: cắt thế nào, chữ kiểu gì, màu, nhạc, và **những gì skill chưa làm được** (`khong_lam_duoc`).
+   Người dùng sửa → sửa tệp.
+5. Dựng theo phong cách: thêm `"phong_cach": "<tên>"` vào kế hoạch; viết khối chữ theo `chu` (mật độ, kiểu, vị trí, viết hoa),
+   `lam_toi_the`, `zoom`, `chen_canh`. Danh sách: `dv.py phong-cach ds`.
+- Chỉ học **cách làm**. Không chép chữ, câu, logo, mặt, giọng, nhạc của video mẫu; không bắt chước để giả làm kênh khác.
+- Luật bắt buộc (mục 4) vẫn thắng phong cách: bìa 0,8 s, chữ không che mặt/động tác, không bịa số.
+
+## 7. Khác
 - «Nâng cấp skill» → `dv.py nang-cap` và làm theo hướng dẫn in ra.
 - Bước đọc in dòng 🔔 "Đã có bản mới" → báo người dùng một câu ở cuối, không chen ngang việc đang dựng.
 - Lỗi lạ → `dv.py kiem-may` trước, rồi đọc thông báo lỗi; nói với người dùng bằng lời dễ hiểu.

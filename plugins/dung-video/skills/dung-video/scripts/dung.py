@@ -212,7 +212,44 @@ def main():
     loi = C.doc_json(os.path.join(du_an, "doc", "loi.json"))["cau"]
     dx = C.doc_json(os.path.join(du_an, "doc", "de-xuat-cat.json"))
     kieu = ke.get("kieu", "tu-van")
-    giu = ke.get("giu") or dx["giu_tu_van" if kieu == "tu-van" else "giu_bai_tap"]
+    # ---- phong cách đã học: đổ vào hồ sơ và kế hoạch những chỗ kế hoạch chưa ghi ----
+    pc = {}
+    if ke.get("phong_cach"):
+        pc = C.doc_json(os.path.join(C.NHA, "phong-cach", ke["phong_cach"] + ".json"))
+        if pc is None:
+            raise SystemExit(f"Không thấy phong cách «{ke['phong_cach']}». Xem: dv.py phong-cach ds")
+        if pc.get("mau", {}).get("nhan"):
+            hs["mau_nhan"] = pc["mau"]["nhan"]
+        if pc.get("mau", {}).get("canh_bao"):
+            hs["mau_canh_bao"] = pc["mau"]["canh_bao"]
+        if pc.get("font_tieu_de"):
+            hs["font_tieu_de"] = pc["font_tieu_de"]
+        p_ = pc.get("phu_de", {})
+        if p_.get("co"):
+            hs["phu_de_co"] = p_["co"]
+        if p_.get("mau_noi"):
+            hs["phu_de_mau_noi"] = p_["mau_noi"]
+        ke.setdefault("phu_de", {})
+        for k in ("bat", "toi_da_chu"):
+            if k in p_:
+                ke["phu_de"].setdefault(k, p_[k])
+        a_ = pc.get("am", {})
+        ke.setdefault("am", {})
+        if a_.get("nhac") and "nhac" not in ke["am"]:
+            ke["am"]["nhac"] = {"tep": a_.get("nhac_tep", "mau:nhe-nhang"), "db": a_.get("nhac_db", -16)}
+        if "sfx" in a_:
+            ke["am"].setdefault("sfx_tu_dong", bool(a_["sfx"]))
+        if pc.get("toc_do"):
+            ke.setdefault("toc_do", pc["toc_do"])
+    giu = ke.get("giu")
+    if not giu and pc.get("cat"):
+        import doc as D
+        do_chat = pc["cat"].get("do_chat", "chat")
+        cheo = {"chat": "tu-van", "giu-nguyen": "bai-tap"}.get(do_chat, "tu-van")
+        kh = dx["khoang"] if do_chat != "vua" else [k for k in dx["khoang"] if k["dai"] > 0.8]
+        giu = D.giu_theo_kieu(dx["dau_cuoi"], kh, cheo if kieu == "tu-van" else "bai-tap",
+                              float(pc["cat"].get("dem_truoc", 0.15)), float(pc["cat"].get("dem_sau", 0.10)))
+    giu = giu or dx["giu_tu_van" if kieu == "tu-van" else "giu_bai_tap"]
     giu = [dict(g, src=g.get("src", 0)) for g in giu]
     for b in ke.get("bo", []):            # AI bỏ thêm: lời đáp của người phụ, câu nói hỏng…
         sb, ba, bb = b.get("src", 0), float(b["a"]), float(b["b"])
@@ -349,7 +386,7 @@ def main():
     if cur:
         nhom.append(cur)
     for ng in nhom:
-        bcs = [V.dan_phu_de(c["tu"], int(W * 0.84)) for c in ng]
+        bcs = [V.dan_phu_de(c["tu"], int(W * 0.84), int(hs.get("phu_de_co", 56))) for c in ng]
         to = max(bcs, key=lambda b: b["w"] * b["h"])
         ban, mat_to = vb.luoi(bd, ng[0]["a"], ng[-1]["b"])
         r = xep(dict(to, le=0), ban, mat_to, "duoi", [], "giua")
@@ -462,6 +499,9 @@ def main():
                 anh_bia.save(p, compress_level=1)
             else:
                 im = trong.copy()
+                toi = max([float(lop[j]["el"].get("lam_toi", 0)) for j, _ in khoa if lop[j]["loai"] == "khoi"] or [0])
+                if toi > 0:                    # làm tối cả khung khi hiện thẻ chữ (kiểu video quảng cáo)
+                    im.alpha_composite(Image.new("RGBA", (W, H), (0, 0, 0, int(255 * min(0.75, toi)))))
                 if anh_logo is not None:
                     im.alpha_composite(anh_logo, vi_tri_logo)
                 for j, v in khoa:
@@ -631,6 +671,7 @@ def main():
           f"- Kiểu video: **{kieu}** · Gốc {tong_goc:.1f}s → thành phẩm **{tong_ra:.1f}s** (giữ {n} đoạn"
           f"{', tốc độ ×' + format(toc, '.2f') if toc != 1 else ''})",
           f"- Thêm: {', '.join(x for x in [f'{len(chen)} cảnh chèn' if chen else '', f'{len(zoom)} đoạn phóng to' if zoom else '', 'logo' if anh_logo is not None else '', 'intro' if goc_ra else '', 'outro' if len(nguon_all) - len(nguon) > (1 if goc_ra else 0) else '', 'nhạc nền' if am.get('nhac') else '', f'{len(sfx_ds)} hiệu ứng âm thanh' if sfx_ds else '', 'giảm ồn' if ke.get('giam_on') else '', 'chỉnh màu' if mau else ''] if x) or 'không'}",
+          (f"- Phong cách: **{ke['phong_cach']}** — {pc.get('mo_ta', '')}\n" if pc else "") +
           f"- Ảnh bìa phủ 0–{bia_giay:.1f}s · chữ mở đầu từ {mo_dau:.1f}s · phụ đề: {'bật' if phu_de_bat else 'tắt'}",
           f"- Âm lượng thành phẩm: {lufs[-1] if lufs else '?'} LUFS (chuẩn {hs.get('am_luong_lufs', -16)})",
           f"- Thời gian dựng: {time.time() - bat_dau:.0f} giây", "", "## Máy đã tự sửa", ""]

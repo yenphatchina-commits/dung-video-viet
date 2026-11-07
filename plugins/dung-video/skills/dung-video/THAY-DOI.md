@@ -1,5 +1,10 @@
 # Các bản đã phát hành
 
+## 1.1.0
+- Học phong cách từ video mẫu (kèm bản thô nếu có): đo nhịp cắt, chỗ ngừng, nhạc, phóng to, màu nhấn; AI xem 24 khung để học kiểu chữ.
+- Dựng theo phong cách đã học (`"phong_cach"` trong kế hoạch).
+- Thêm chữ có chân nghiêng (Playfair Display, giấy phép OFL), dòng nhỏ chữ hoa giãn, làm tối nền khi hiện thẻ chữ, thẻ chỉ có viền.
+
 ## 1.0.0 — bản bán đầu tiên
 - Chạy được nhánh nhận giọng cho Windows và Mac Intel (faster-whisper), tương thích ffmpeg cũ (5–6).
 - Sửa lỗi đường dẫn có dấu nháy đơn (vd tên người dùng Windows).

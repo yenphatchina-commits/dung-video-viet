@@ -1,4 +1,4 @@
-# Hướng dẫn sử dụng — Dựng video (bản 1.0)
+# Hướng dẫn sử dụng — Dựng video (bản 1.1)
 
 ## Cần có
 - Máy Mac hoặc Windows 10/11, ổ đĩa trống ít nhất 5 GB, có mạng lúc cài.
@@ -34,6 +34,12 @@ Nói thẳng chỗ chưa ưng, càng cụ thể càng nhanh:
 - "tắt phụ đề" / "bật phụ đề"
 - "ảnh bìa lấy khung lúc chị cười ở giây 12"
 
+## Học phong cách từ video bạn thích
+- Kéo video mẫu vào và nói: "học phong cách video này, đặt tên là sôi động". Có bản thô của video đó thì kéo vào luôn — học chính xác hơn.
+- Claude báo lại đã học được gì (cắt, chữ, màu, nhạc) và chỗ nào chưa làm được. Chưa đúng thì nói để sửa.
+- Lần sau: "dựng video này theo phong cách sôi động". Xem danh sách: "các phong cách đã học".
+- Skill chỉ học **cách dựng**, không chép chữ, logo, khuôn mặt, nhạc của video mẫu.
+
 ## Hồ sơ kênh (làm 1 lần)
 Nói: "tạo hồ sơ kênh". Claude hỏi tên cơ sở, tên người dẫn, các tên riêng hay bị nghe sai, màu chủ đạo.
 Từ đó phụ đề luôn ghi đúng tên thương hiệu của bạn.
@@ -49,7 +55,7 @@ Có thể gửi luôn **logo** (ảnh PNG nền trong suốt), **intro** và **o
 - Bản dọc 9:16 dùng chung cho TikTok, Facebook Reels, YouTube Shorts (Shorts và Reels tối đa 3 phút).
 - Bản ngang 16:9 (YouTube) và 4:5 (bảng tin Facebook): video dọc ở giữa, hai bên là nền mờ của chính video.
 
-## Giới hạn bản 1.0
+## Giới hạn bản 1.1
 - Mỗi lượt tối đa **5 phút** clip (tính cả cảnh minh hoạ) và **1 GB**.
 - Chỉnh màu chỉ khi bạn yêu cầu — mặc định giữ màu gốc.
 
