@@ -1,6 +1,6 @@
 ---
 name: dung-video
-description: Dựng video dọc 9:16 tiếng Việt (TikTok, Reels, Shorts) từ clip quay điện thoại cho người không biết edit — tự nghe lời, cắt khoảng ngừng, bỏ câu nói hỏng, thêm chữ chốt ý tránh mặt và tránh động tác, phụ đề tô chữ đang nói, chèn cảnh minh hoạ (B-roll), nhạc nền tự nhỏ khi có lời, hiệu ứng âm thanh, logo, intro/outro, phóng to đoạn quan trọng, tăng tốc, giảm ồn, ảnh bìa phủ giây đầu, chuẩn âm lượng, xuất MP4 dọc và thêm khổ ngang YouTube / 4:5 Facebook. Dùng khi người dùng đưa video và nói "dựng", "edit", "làm video", "cắt video", "thêm chữ", "làm phụ đề", "làm ảnh bìa", hoặc "cài đặt dựng video", "kích hoạt mã", "kiểm tra máy", "nâng cấp skill", "học phong cách video này", "dựng theo phong cách …".
+description: Dựng video dọc 9:16 tiếng Việt (TikTok, Reels, Shorts) từ clip quay điện thoại cho người không biết edit — tự nghe lời, cắt khoảng ngừng, bỏ câu nói hỏng, thêm chữ chốt ý tránh mặt và tránh động tác, phụ đề tô chữ đang nói, chèn cảnh minh hoạ (B-roll), nhạc nền tự nhỏ khi có lời, hiệu ứng âm thanh, logo, intro/outro, phóng to đoạn quan trọng, chuyển cảnh 3D, sticker động, chữ cong, chữ chạy, hiệu ứng chữ xuất hiện, tăng tốc, giảm ồn, ảnh bìa phủ giây đầu, chuẩn âm lượng, xuất MP4 dọc và thêm khổ ngang YouTube / 4:5 Facebook. Dùng khi người dùng đưa video và nói "dựng", "edit", "làm video", "cắt video", "thêm chữ", "làm phụ đề", "làm ảnh bìa", hoặc "cài đặt dựng video", "kích hoạt mã", "kiểm tra máy", "nâng cấp skill", "học phong cách video này", "dựng theo phong cách …".
 ---
 
 # Dựng video
@@ -54,6 +54,14 @@ Cấu trúc đầy đủ và ví dụ: `tai-lieu/ke-hoach.md` (đọc trước k
 - **giam_on**: bật khi `tom-tat.md` báo ồn nền cao hoặc nghe có quạt/xe; nhắc người dùng nghe lại.
 - **mau**: CHỈ khi người dùng cho phép chỉnh màu (luật giữ màu gốc). Nhẹ tay: sang ±0,05, tuong_phan 0,95–1,1, bao_hoa 0,9–1,15.
 - **xuat**: hỏi đăng ở đâu. TikTok/Reels/Shorts dùng chung bản dọc. Thêm `"ngang"` cho YouTube thường, `"4x5"` cho bảng tin Facebook.
+- **Hiệu ứng động** (chi tiết `tai-lieu/ke-hoach.md`) — dùng **ít mà đúng chỗ**, người xem lớn tuổi dễ rối mắt:
+  - `vao` của khối chữ: `pop` (tiêu đề), `go-chu` (danh sách, lời dặn), `truot` (thẻ), `nay` (cảnh báo, ưu đãi).
+  - `chuyen_canh`: chỉ ở chỗ **đổi phần/ý lớn** (1–3 lần mỗi phút): `lat-3d`, `zoom-xoay`, `lia`, `flash`, `mo`.
+    Không đặt giữa một câu đang nói. Cảnh chèn có thể ghi `"chuyen": "lia"`.
+  - `sticker`: `tich` cạnh điều nên làm, `x` cạnh điều không nên, `mui-ten` chỉ vào thẻ chữ, `khoanh-tron`/`gach-chan`
+    nhấn vào vật trong hình, `sao`/`tim`/`nhan` (huy hiệu có chữ, vd "HOT") cho ưu đãi, lời kết. Tối đa ~1 sticker/10 s.
+  - Khối `cong` (chữ cong) cho tên thương hiệu, khẩu hiệu ngắn; khối `chay` (chữ chạy ngang) cho ưu đãi, lời kêu gọi cuối.
+  - Không có sẵn hiệu ứng người dùng muốn → nói rõ, đề xuất hiệu ứng gần nhất.
 - **am.sfx_tu_dong**: mặc định bật (tiếng nhẹ khi chữ hiện, "vút" khi hết bìa và khi vào cảnh chèn). Người dùng thấy ồn → tắt.
 
 ## 4. Luật bắt buộc (máy tự giữ — không ghi đè)

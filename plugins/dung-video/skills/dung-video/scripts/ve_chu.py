@@ -145,8 +145,9 @@ def dan_khoi(el, hs, rong_max):
             "nen_trong": el.get("nen") == "trong"}
 
 
-def ve_khoi(bc, hs, hien=None):
-    """Vẽ khối; hien = tập chỉ số dòng đang hiện (None = tất cả)."""
+def ve_khoi(bc, hs, hien=None, gioi_han=None):
+    """Vẽ khối; hien = tập chỉ số dòng đang hiện (None = tất cả); gioi_han = số ký tự đã "gõ" (hiệu ứng gõ chữ)."""
+    con = gioi_han
     im = Image.new("RGBA", (bc["w"], bc["h"]), (0, 0, 0, 0))
     le = bc["le"]
     if bc["kieu"] == "the-den":
@@ -166,6 +167,10 @@ def ve_khoi(bc, hs, hien=None):
         yy = x["y"] + x["dy"]
         for s in x["dong_chu"]:
             rr = do_dai(s, x["f"], x["gian"])
+            if con is not None:
+                s, con = s[:max(0, con)], con - len(s)
+                if not s:
+                    break
             xx = x["x"] + (x["w"] - rr) / 2 if bc["can"] == "giua" or x["nen"] else x["x"] + x["dx"]
             if x["bong"]:
                 co_bong = True

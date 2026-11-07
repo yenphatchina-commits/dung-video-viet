@@ -1,4 +1,4 @@
-# Hướng dẫn sử dụng — Dựng video (bản 1.1)
+# Hướng dẫn sử dụng — Dựng video (bản 1.2)
 
 ## Cần có
 - Máy Mac hoặc Windows 10/11, ổ đĩa trống ít nhất 5 GB, có mạng lúc cài.
@@ -22,6 +22,8 @@ Kéo tệp video vào khung chat rồi nói, ví dụ:
 - "thêm nhạc nền nhẹ nhàng" / "dùng bài nhạc này" (kéo tệp nhạc vào) / "tắt tiếng hiệu ứng"
 - "phóng to vào mặt lúc nói câu chốt" / "nói nhanh lên chút" / "lọc tiếng quạt"
 - "xuất thêm bản ngang cho YouTube và bản 4:5 cho Facebook"
+- "thêm chuyển cảnh lật 3D lúc sang phần mới" · "thêm dấu tích cạnh lời khuyên, dấu X cạnh điều không nên"
+- "tên cơ sở làm chữ cong" · "cho dòng ưu đãi chạy ngang ở cuối" · "chữ hiện ra kiểu gõ từng chữ"
 
 Claude sẽ hỏi nhanh 3 câu (người xem là ai, xem xong hiểu gì, muốn họ làm gì) — trả lời hoặc nói "tự làm đi".
 Khoảng vài phút sau bạn nhận: video MP4 1080×1920, ảnh bìa, và báo cáo những chỗ nên tự xem lại.
@@ -55,7 +57,7 @@ Có thể gửi luôn **logo** (ảnh PNG nền trong suốt), **intro** và **o
 - Bản dọc 9:16 dùng chung cho TikTok, Facebook Reels, YouTube Shorts (Shorts và Reels tối đa 3 phút).
 - Bản ngang 16:9 (YouTube) và 4:5 (bảng tin Facebook): video dọc ở giữa, hai bên là nền mờ của chính video.
 
-## Giới hạn bản 1.1
+## Giới hạn bản 1.2
 - Mỗi lượt tối đa **5 phút** clip (tính cả cảnh minh hoạ) và **1 GB**.
 - Chỉnh màu chỉ khi bạn yêu cầu — mặc định giữ màu gốc.
 

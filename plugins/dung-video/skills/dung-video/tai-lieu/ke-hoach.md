@@ -34,6 +34,22 @@ Ghi `"theo": "ra"` nếu muốn tính theo giây thành phẩm (dùng cho khối
 - `am.nhac.db`: nhạc nhỏ hơn giọng bao nhiêu (−14 rõ nhạc · −16 vừa · −20 rất nhẹ). Nhạc tự lặp nếu ngắn hơn video.
 - Cảnh chèn không đè lên 0,8 s ảnh bìa; hai cảnh chèn chồng nhau thì máy cắt cảnh trước.
 
+## Hiệu ứng động
+```jsonc
+"chuyen_canh": [{"t": 12.3, "kieu": "lat-3d", "dai": 0.6}],      // lat-3d | zoom-xoay | lia | flash | mo; t = điểm giữa chuyển
+"chen": [{"phu": 0, "a": 120, "t0": 17.5, "t1": 21.3, "chuyen": "lia"}],   // chuyển cảnh lúc vào và ra cảnh chèn
+"sticker": [
+  {"loai": "tich", "t0": 33.0, "t1": 37.3, "gan": "tu-van", "co": 0.12},   // gan = id khối chữ → đặt cạnh khối đó
+  {"loai": "mui-ten", "t0": 22, "t1": 26, "gan": "tai-lai", "huong": "trai"},
+  {"loai": "nhan", "t0": 44, "t1": 48, "vi_tri": [0.8, 0.25], "chu": "HOT", "mau": "#FF5A1F"}
+]
+// loai: mui-ten (huong: trai|phai|len|xuong) · khoanh-tron · gach-chan · sao · tim · tich · x · nhan (có "chu")
+// co = bề ngang so với khung (0,08–0,45). Máy tự dời nếu đè mặt, động tác hoặc chữ (khoanh-tron/gach-chan được đè chữ).
+```
+- Khối chữ thêm `"vao"`: `pop` · `nay` · `truot` · `go-chu` (hiện dần từng chữ cái).
+- Khối `{"kieu": "cong", "do_cong": 60, "dong": [{"text": "...", "vai": "tieu-vang"}]}`: chữ xếp theo cung (âm = cong xuống).
+- Khối `{"kieu": "chay", "t0", "t1", "vi_tri": "tren|duoi", "toc": 200, "dong": [{"text": "...", "vai": "nhan-vang"}]}`: chữ chạy ngang.
+
 ## Khối chữ
 `{"id", "kieu", "t0", "t1", "dong": [...], "can": "giua"|"trai", "vi_tri": "tren"|"giua"|"duoi", "theo": "ra"?}`
 

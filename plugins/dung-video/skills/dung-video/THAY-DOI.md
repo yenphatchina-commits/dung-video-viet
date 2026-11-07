@@ -1,5 +1,11 @@
 # Các bản đã phát hành
 
+## 1.2.0
+- Chuyển cảnh: lật 3D, zoom xoáy, lia máy, flash, mờ — đặt ở chỗ đổi ý hoặc lúc vào/ra cảnh chèn.
+- Sticker động tự vẽ (không bản quyền): mũi tên, khoanh tròn, gạch chân, lấp lánh, tim, dấu tích, dấu X, huy hiệu có chữ.
+  Tự dời chỗ để không che mặt, động tác, chữ.
+- Chữ cong theo cung tròn, dải chữ chạy ngang, hiệu ứng chữ xuất hiện (pop, nảy, trượt, gõ từng chữ).
+
 ## 1.1.0
 - Học phong cách từ video mẫu (kèm bản thô nếu có): đo nhịp cắt, chỗ ngừng, nhạc, phóng to, màu nhấn; AI xem 24 khung để học kiểu chữ.
 - Dựng theo phong cách đã học (`"phong_cach"` trong kế hoạch).

@@ -3,7 +3,7 @@ chuẩn âm lượng, xuất MP4 + ảnh bìa + ảnh xem lại + báo cáo.
 
     dv.py dung <thư mục dự án> [--ten <tên tệp ra>] [--nhap]   (--nhap: bản xem nhanh 540p)
 """
-import argparse, hashlib, os, re, sys, tempfile, time
+import argparse, hashlib, math, os, re, sys, tempfile, time
 import numpy as np
 from PIL import Image
 
@@ -13,6 +13,7 @@ import ho_so as HS
 import ve_chu as V
 import ban_quyen as BQ
 import am_thanh as AT
+import hieu_ung as HU
 
 W, H = C.W, C.H
 ANH_DUOI = (".png", ".jpg", ".jpeg", ".webp")
@@ -343,6 +344,21 @@ def main():
     zoom.sort(key=lambda z: z["t0"])
     vb.zoom = zoom
 
+    # ---- chuyển cảnh (3D, zoom xoáy, lia, flash, mờ) ----
+    chuyen = []
+    for c in ke.get("chuyen_canh", []):
+        if c.get("kieu") in HU.LOAI_CHUYEN:
+            chuyen.append({"t": doi(c["t"], c), "kieu": c["kieu"], "dai": min(1.2, max(0.25, float(c.get("dai", 0.5))))})
+    for c in ke.get("chen", []):
+        if c.get("chuyen") in HU.LOAI_CHUYEN:
+            for t_ in (doi(c["t0"], c), doi(c["t1"], c)):
+                chuyen.append({"t": t_, "kieu": c["chuyen"], "dai": 0.45})
+    chuyen = sorted([c for c in chuyen if bia_giay + c["dai"] / 2 < c["t"] < bd.tong - 0.3], key=lambda c: c["t"])
+    for x_, y_ in zip(chuyen, chuyen[1:]):
+        if y_["t"] - x_["t"] < (x_["dai"] + y_["dai"]) / 2:
+            y_["kieu"] = None
+    chuyen = [c for c in chuyen if c["kieu"]]
+
     # ---- âm thanh: nhạc nền + hiệu ứng ----
     am = ke.get("am", {})
     sfx_ds = []
@@ -351,6 +367,8 @@ def main():
             sfx_ds.append({"t": doi(s["t"], s), "loai": s["loai"], "db": float(s.get("db", -18))})
     if am.get("sfx_tu_dong", hs.get("sfx_tu_dong", True)):
         sfx_ds.append({"t": max(0.0, bia_giay - 0.2), "loai": "whoosh", "db": -20})
+        for c in chuyen:
+            sfx_ds.append({"t": max(0.0, c["t"] - c["dai"] / 2), "loai": "whoosh", "db": -21})
         for c in chen:
             sfx_ds.append({"t": max(0.0, c["t0"] - 0.15), "loai": "whoosh", "db": -24})
 
@@ -399,7 +417,8 @@ def main():
             da_dat_theo_t.append((c["a"], c["b"], ((W - to["w"]) // 2, y, to["w"], to["h"])))
 
     # ---- khối chữ ----
-    chu = sorted(ke.get("chu", []), key=lambda e: doi(e.get("t0", 0), e) or 0)
+    chu_chay = [e for e in ke.get("chu", []) if e.get("kieu") == "chay"]
+    chu = sorted([e for e in ke.get("chu", []) if e.get("kieu") != "chay"], key=lambda e: doi(e.get("t0", 0), e) or 0)
     for i, el in enumerate(chu):
         t0 = doi(el.get("t0", 0), el)
         t1 = doi(el.get("t1"), el)
@@ -415,7 +434,14 @@ def main():
                 d["t0"] = max(t0, doi(d["t0"], el))
         for co in (1.0, 0.85, 0.72):
             el["co"] = co
-            bc = V.dan_khoi(el, hs, int(W * (0.88 if el.get("can", "giua") == "giua" else 0.80)))
+            if el.get("kieu") == "cong":
+                d0 = el["dong"][0]
+                anh = HU.chu_cong(d0["text"], hs, int(84 * co), float(el.get("do_cong", 60)), d0.get("vai", "tieu-vang"))
+                if anh.width > W * 0.92:
+                    continue
+                bc = {"w": anh.width, "h": anh.height, "le": 0, "anh": anh, "kieu": "cong"}
+            else:
+                bc = V.dan_khoi(el, hs, int(W * (0.88 if el.get("can", "giua") == "giua" else 0.80)))
             ban, mat_to = vb.luoi(bd, t0, t1)
             dang = [o for (a0, b0, o) in da_dat_theo_t if a0 < t1 and t0 < b0]
             r = xep(bc, ban, mat_to, el.get("vi_tri", {"the-den": "tren", "nhan": "tren", "tieu-de": "giua"}
@@ -472,6 +498,17 @@ def main():
             moc |= {w["a"] for w in l["tu"]}
         else:
             moc |= {d["t0"] for d in l["el"]["dong"] if d.get("t0") is not None}
+    def dai_vao(el):
+        v = el.get("vao")
+        if not v:
+            return 0
+        if v == "go-chu":
+            return min(1.2, 0.045 * sum(len(d["text"]) for d in el.get("dong", [])))
+        return 0.35
+    for l in lop:
+        if l["loai"] == "khoi" and dai_vao(l["el"]):
+            dv = dai_vao(l["el"])
+            moc |= {l["a"] + k / C.FPS for k in range(1, int(dv * C.FPS) + 1)}
     moc = sorted(m for m in moc if 0 <= m <= bd.tong)
     tam = os.path.join(du_an, "tam", "lop")
     os.makedirs(tam, exist_ok=True)
@@ -491,7 +528,9 @@ def main():
                         khoa.append((j, k))
                     else:
                         hien = tuple(i for i, d in enumerate(l["el"]["dong"]) if d.get("t0") is None or d["t0"] <= s + 1e-3)
-                        khoa.append((j, hien))
+                        dv = dai_vao(l["el"])
+                        tien = round(min(1.0, (s - l["a"]) / dv), 2) if dv and s < l["a"] + dv else 1.0
+                        khoa.append((j, hien, tien))
             khoa = tuple(khoa)
         if khoa not in da_ve:
             p = os.path.join(tam, hashlib.md5(repr(khoa).encode()).hexdigest()[:12] + ".png")
@@ -499,15 +538,40 @@ def main():
                 anh_bia.save(p, compress_level=1)
             else:
                 im = trong.copy()
-                toi = max([float(lop[j]["el"].get("lam_toi", 0)) for j, _ in khoa if lop[j]["loai"] == "khoi"] or [0])
+                toi = max([float(lop[m_[0]]["el"].get("lam_toi", 0)) for m_ in khoa if lop[m_[0]]["loai"] == "khoi"] or [0])
                 if toi > 0:                    # làm tối cả khung khi hiện thẻ chữ (kiểu video quảng cáo)
                     im.alpha_composite(Image.new("RGBA", (W, H), (0, 0, 0, int(255 * min(0.75, toi)))))
                 if anh_logo is not None:
                     im.alpha_composite(anh_logo, vi_tri_logo)
-                for j, v in khoa:
-                    l = lop[j]
-                    k = V.ve_phu_de(l["bc"], hs, v) if l["loai"] == "phu" else V.ve_khoi(l["bc"], hs, set(v))
-                    im.alpha_composite(k, (int(l["x"]), int(l["y"])))
+                for muc in khoa:
+                    l = lop[muc[0]]
+                    if l["loai"] == "phu":
+                        im.alpha_composite(V.ve_phu_de(l["bc"], hs, muc[1]), (int(l["x"]), int(l["y"])))
+                        continue
+                    hien, tien = set(muc[1]), muc[2]
+                    kv = l["el"].get("vao") if tien < 1 else None
+                    if l["bc"].get("anh") is not None:
+                        k = l["bc"]["anh"]
+                    elif kv == "go-chu":
+                        tong_chu = sum(len(s_) for d_ in l["bc"]["dong"] for s_ in d_["dong_chu"])
+                        k = V.ve_khoi(l["bc"], hs, hien, int(tong_chu * tien))
+                    else:
+                        k = V.ve_khoi(l["bc"], hs, hien)
+                    x0, y0 = int(l["x"]), int(l["y"])
+                    if kv in ("pop", "nay", "truot"):
+                        em = 1 - (1 - tien) ** 3
+                        if kv == "pop":
+                            ti = 0.55 + 0.45 * em + 0.08 * math.sin(math.pi * tien)
+                        elif kv == "nay":
+                            ti = 0.7 + 0.3 * em + 0.15 * math.sin(3 * math.pi * tien) * (1 - tien)
+                        else:
+                            ti = 1.0
+                        k2 = k.resize((max(1, int(k.width * ti)), max(1, int(k.height * ti))), Image.BICUBIC) if ti != 1 else k.copy()
+                        k2.putalpha(k2.getchannel("A").point(lambda a_, m_=min(1, tien * 2.5): int(a_ * m_)))
+                        dy = int(70 * (1 - em)) if kv == "truot" else 0
+                        im.alpha_composite(k2, (x0 + (k.width - k2.width) // 2, y0 + (k.height - k2.height) // 2 + dy))
+                    else:
+                        im.alpha_composite(k, (x0, y0))
                 im.save(p, compress_level=1)
             da_ve[khoa] = p
         ds.append((da_ve[khoa], e - s))
@@ -576,17 +640,86 @@ def main():
         loc.append(f"[{vtruoc}][b{j}]overlay=0:0:eof_action=pass:enable='between(t,{c['t0']:.3f},{c['t1']:.3f})'[vb{j}]")
         vtruoc = f"vb{j}"
         so_vao += 1
+    loc_chuyen = HU.bo_loc_chuyen(chuyen, W, H)
+    if loc_chuyen:
+        loc.append(f"[{vtruoc}]{loc_chuyen}[vcc]")
+        vtruoc = "vcc"
     chi_so_lop = so_vao
     so_vao += 1                                         # lớp chữ (ffconcat) là đầu vào kế tiếp
     loc.append(f"[{chi_so_lop}:v]fps={C.FPS},format=rgba[ov]")
     cuoi = f"scale=540:960," if a.nhap else ""
     toc = min(1.5, max(0.75, float(ke.get("toc_do", 1.0))))
-    loc.append(f"[{vtruoc}][ov]overlay=0:0:eof_action=pass:format=auto,{cuoi}format=yuv420p"
-               + (f",setpts=PTS/{toc:.3f}[v]" if toc != 1 else "[v]"))
+    loc.append(f"[{vtruoc}][ov]overlay=0:0:eof_action=pass:format=auto[vt]")
+    vtruoc = "vt"
+    vao_sau = []
+    # sticker động: chuỗi PNG tự vẽ, đặt tránh mặt/động tác và tránh khối chữ
+    for k_, st in enumerate(ke.get("sticker", [])):
+        if st.get("loai") not in HU.LOAI_STICKER:
+            canh_bao.append(f"Sticker «{st.get('loai')}» chưa có — bỏ qua.")
+            continue
+        t0, t1 = doi(st["t0"], st), doi(st.get("t1", float(st["t0"]) + 2.5), st)
+        t0 = max(t0, bia_giay)
+        if t1 - t0 < 0.4:
+            continue
+        rong = int(W * min(0.45, max(0.08, float(st.get("co", 0.2)))))
+        cao = rong if st["loai"] != "gach-chan" else int(rong * 0.35)
+        if st.get("gan"):
+            o = next((l for l in lop if l["loai"] == "khoi" and l["el"].get("id") == st["gan"]), None)
+            if o is None:
+                canh_bao.append(f"Sticker gắn vào khối «{st['gan']}» không có — đặt theo vi_tri.")
+                cx, cy = st.get("vi_tri", [0.78, 0.3])
+            else:
+                cx = (o["x"] + o["bc"]["w"] + rong * 0.35) / W if st["loai"] != "gach-chan" else (o["x"] + o["bc"]["w"] / 2) / W
+                cy = (o["y"] + o["bc"]["h"] / 2) / H if st["loai"] != "gach-chan" else (o["y"] + o["bc"]["h"]) / H
+        else:
+            cx, cy = st.get("vi_tri", [0.78, 0.3])
+        ban, _ = vb.luoi(bd, t0, t1)
+        dang = [o for (a0, b0, o) in da_dat_theo_t if a0 < t1 and t0 < b0]
+        tot = None
+        for dx_ in (0, -0.08, 0.08, -0.16, 0.16):
+            for dy_ in (0, 0.06, -0.06, 0.12, -0.12):
+                x = int(min(W * 0.95 - rong, max(W * 0.05, (cx + dx_) * W - rong / 2)))
+                y = int(min(H * 0.78 - cao, max(H * 0.07, (cy + dy_) * H - cao / 2)))
+                r0, r1, c0, c1 = y * LD // H, (y + cao) * LD // H + 1, x * LC // W, (x + rong) * LC // W + 1
+                phat = float(ban[r0:r1, c0:c1].max()) * 10 + abs(dx_) * 20 + abs(dy_) * 20
+                for (ox, oy, ow, oh) in (dang if st["loai"] not in ("khoanh-tron", "gach-chan") else []):
+                    if max(0, min(x + rong, ox + ow) - max(x, ox)) * max(0, min(y + cao, oy + oh) - max(y, oy)) > 0:
+                        phat += 50
+                if tot is None or phat < tot[0]:
+                    tot = (phat, x, y, dx_ or dy_)
+        _, x, y, doi_cho = tot
+        if doi_cho:
+            may_sua.append(f"Sticker «{st['loai']}» ({t0:.1f}s): dời chỗ để không che mặt/động tác/chữ")
+        mau_st = st.get("mau", hs["mau_nhan"])
+        mau_dl = HU.xuat_sticker(os.path.join(du_an, "tam", f"sticker-{k_}"), st["loai"], rong, cao, t1 - t0,
+                                 mau_st, st.get("chu", ""), st.get("huong", "phai"))
+        vao_sau += ["-framerate", str(C.FPS), "-i", mau_dl]
+        loc.append(f"[{so_vao}:v]format=rgba,setpts=PTS-STARTPTS+{t0:.3f}/TB[st{k_}]")
+        loc.append(f"[{vtruoc}][st{k_}]overlay={x}:{y}:eof_action=pass:format=auto:enable='between(t,{t0:.3f},{t1:.3f})'[vs{k_}]")
+        vtruoc = f"vs{k_}"
+        so_vao += 1
+        if am.get("sfx_tu_dong", hs.get("sfx_tu_dong", True)):
+            sfx_ds.append({"t": t0, "loai": "pop" if st["loai"] not in ("tich", "sao") else "ting", "db": -22})
+    # chữ chạy ngang (kiểu bảng tin)
+    for k_, el in enumerate(chu_chay):
+        t0, t1 = max(doi(el.get("t0", 0), el), bia_giay), doi(el.get("t1"), el) or bd.tong
+        dai = HU.dai_chu_chay(el["dong"][0]["text"], hs, int(el.get("co", 46)), el["dong"][0].get("vai", "nhan-vang"))
+        p_dai = os.path.join(du_an, "tam", f"chu-chay-{k_}.png")
+        dai.save(p_dai)
+        ban, mat_to = vb.luoi(bd, t0, t1)
+        dang = [o for (a0, b0, o) in da_dat_theo_t if a0 < t1 and t0 < b0]
+        r = xep({"w": W, "h": dai.height, "le": 0}, ban, mat_to, el.get("vi_tri", "duoi"), dang, "giua")
+        y = r[2] if r else int(H * 0.7)
+        toc_chay = float(el.get("toc", 200))
+        vao_sau += ["-loop", "1", "-framerate", str(C.FPS), "-t", f"{t1 + 1:.2f}", "-i", p_dai]
+        loc.append(f"[{vtruoc}][{so_vao}:v]overlay=x='W-mod((t-{t0:.3f})*{toc_chay:.0f},w+W)':y={y}:format=auto:"
+                   f"eof_action=pass:enable='between(t,{t0:.3f},{t1:.3f})'[vr{k_}]")
+        vtruoc = f"vr{k_}"
+        so_vao += 1
+    loc.append(f"[{vtruoc}]{cuoi}format=yuv420p" + (f",setpts=PTS/{toc:.3f}[v]" if toc != 1 else "[v]"))
 
     # ---- âm thanh: giọng chuẩn hoá → nhạc nền né giọng → hiệu ứng ----
     muc_giong = float(hs.get("am_luong_lufs", -16))
-    vao_sau = []
     tron = ["[giong]"]
     nhac = am.get("nhac")
     giam_on = "afftdn=nf=-30:nr=12," if ke.get("giam_on") else ""
@@ -646,6 +779,7 @@ def main():
         _, _, err = C.sh([C.ffmpeg(), "-nostats", "-i", ra, "-af", "ebur128", "-vn", "-f", "null", "-"], bat_buoc=False)
         lufs = re.findall(r"I:\s+(-?[\d.]+) LUFS", err)
     tong_ra = bd.tong / toc
+    so_sticker = len(ke.get("sticker", []))
     # ---- xuất thêm khổ khác cho nền tảng khác (nền mờ hai bên, video dọc giữa) ----
     tep_them = []
     for k in ke.get("xuat", []):
@@ -670,7 +804,7 @@ def main():
           f"- Bản quyền cấp cho: **{giay_phep}** · Dựng video {C.PHIEN_BAN}",
           f"- Kiểu video: **{kieu}** · Gốc {tong_goc:.1f}s → thành phẩm **{tong_ra:.1f}s** (giữ {n} đoạn"
           f"{', tốc độ ×' + format(toc, '.2f') if toc != 1 else ''})",
-          f"- Thêm: {', '.join(x for x in [f'{len(chen)} cảnh chèn' if chen else '', f'{len(zoom)} đoạn phóng to' if zoom else '', 'logo' if anh_logo is not None else '', 'intro' if goc_ra else '', 'outro' if len(nguon_all) - len(nguon) > (1 if goc_ra else 0) else '', 'nhạc nền' if am.get('nhac') else '', f'{len(sfx_ds)} hiệu ứng âm thanh' if sfx_ds else '', 'giảm ồn' if ke.get('giam_on') else '', 'chỉnh màu' if mau else ''] if x) or 'không'}",
+          f"- Thêm: {', '.join(x for x in [f'{len(chen)} cảnh chèn' if chen else '', f'{len(zoom)} đoạn phóng to' if zoom else '', f'{len(chuyen)} chuyển cảnh' if chuyen else '', f'{so_sticker} sticker' if so_sticker else '', f'{len(chu_chay)} dải chữ chạy' if chu_chay else '', 'logo' if anh_logo is not None else '', 'intro' if goc_ra else '', 'outro' if len(nguon_all) - len(nguon) > (1 if goc_ra else 0) else '', 'nhạc nền' if am.get('nhac') else '', f'{len(sfx_ds)} hiệu ứng âm thanh' if sfx_ds else '', 'giảm ồn' if ke.get('giam_on') else '', 'chỉnh màu' if mau else ''] if x) or 'không'}",
           (f"- Phong cách: **{ke['phong_cach']}** — {pc.get('mo_ta', '')}\n" if pc else "") +
           f"- Ảnh bìa phủ 0–{bia_giay:.1f}s · chữ mở đầu từ {mo_dau:.1f}s · phụ đề: {'bật' if phu_de_bat else 'tắt'}",
           f"- Âm lượng thành phẩm: {lufs[-1] if lufs else '?'} LUFS (chuẩn {hs.get('am_luong_lufs', -16)})",
