@@ -13,5 +13,7 @@
  "logo": {"tep": "", "goc": "tren-phai", "rong": 0.14, "mo": 0.9},
  "intro": "", "intro_giay": 1.5,
  "outro": "", "outro_giay": 2.0,
- "sfx_tu_dong": true
+ "sfx_tu_dong": true,
+ "phat_am": {"Zalo": "Da lô"},
+ "mau_nen": "#141418"
 }

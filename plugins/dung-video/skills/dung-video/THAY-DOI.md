@@ -1,5 +1,11 @@
 # Các bản đã phát hành
 
+## 1.3.0
+- Lồng tiếng bằng giọng đọc AI chạy trên máy (VieNeu-TTS v3 Turbo, Apache 2.0): 23 giọng Bắc/Trung/Nam, giọng riêng
+  (nhân bản, chỉ khi có đồng ý), bảng sửa phát âm chữ nước ngoài, tự ghép nền mỗi câu một cảnh; phụ đề lấy đúng chữ kịch bản.
+- Luật "không che mặt" thành luật cứng cho cả khối chữ, phụ đề, sticker, chữ chạy: xét mọi vị trí mặt trong lúc chữ hiện,
+  giữ dấu mặt khi người cúi/nghiêng; sticker tìm chỗ khắp vùng an toàn; phụ đề tránh khối chữ, hết chỗ thì tạm ẩn.
+
 ## 1.2.0
 - Chuyển cảnh: lật 3D, zoom xoáy, lia máy, flash, mờ — đặt ở chỗ đổi ý hoặc lúc vào/ra cảnh chèn.
 - Sticker động tự vẽ (không bản quyền): mũi tên, khoanh tròn, gạch chân, lấp lánh, tim, dấu tích, dấu X, huy hiệu có chữ.

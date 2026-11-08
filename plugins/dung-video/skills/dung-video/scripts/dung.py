@@ -73,6 +73,7 @@ class VungBan:
     def luoi(self, bd, t0, t1):
         """Lưới 48×27 (hàng × cột) điểm bận trong khoảng thành phẩm [t0,t1]; cùng lúc trả mặt lớn nhất."""
         g = np.zeros((LD, LC), np.float32)
+        mat_hop = np.zeros((LD, LC), np.float32)      # HỢP mọi vị trí mặt từng có trong khoảng (luật cứng: không che mặt)
         mat_to, n = None, 0
         for t in np.arange(t0, max(t0 + 0.01, t1), 0.25):
             c = next((c for c in self.chen if c["t0"] <= t < c["t1"]), None)
@@ -97,17 +98,22 @@ class VungBan:
                     m = np.array(Image.fromarray((m * 255).astype(np.uint8)).crop(hop_c).resize((LC, LD))) / 255.0
                 g += m
             ds_mat = mats[min(k, len(mats) - 1)] if mats else []
+            if not ds_mat and mats:                    # người cúi/nghiêng làm máy mất dấu mặt: lấy mặt gần nhất trong ±1 giây
+                for dk in (1, -1, 2, -2, 3, -3, 4, -4):
+                    if 0 <= k + dk < len(mats) and mats[k + dk]:
+                        ds_mat = mats[k + dk]
+                        break
             if z:
                 x0, y0 = z["cx"] - 0.5 / z["z"], z["cy"] - 0.5 / z["z"]
                 ds_mat = [((x - x0) * z["z"], (y - y0) * z["z"], w * z["z"], h * z["z"], s_) for (x, y, w, h, s_) in ds_mat]
             for (x, y, w, h, s) in ds_mat:
                 x0, x1 = max(0, x - w * 0.15), min(1, x + w * 1.15)
                 y0, y1 = max(0, y - h * 0.25), min(1, y + h * 1.12)   # tới cằm
-                g[int(y0 * LD):int(np.ceil(y1 * LD)), int(x0 * LC):int(np.ceil(x1 * LC))] += 6.0
+                mat_hop[int(y0 * LD):int(np.ceil(y1 * LD)), int(x0 * LC):int(np.ceil(x1 * LC))] = 8.0
                 if mat_to is None or w * h > mat_to[2] * mat_to[3]:
                     mat_to = (x, y, w, h)
             n += 1
-        return np.clip(g / max(1, n) - self.nen_tb, 0, None), mat_to
+        return np.clip(g / max(1, n) - self.nen_tb, 0, None) + mat_hop, mat_to
 
     def tam_mat(self, bd, t0, t1):
         """Tâm khuôn mặt trung vị trong [t0,t1] (toạ độ 0..1), để phóng to vào mặt."""
@@ -137,24 +143,30 @@ def xep(bc, ban, mat_to, uu_tien, da_dat, can):
         return None
     can_cam = mat_to is not None and mat_to[3] > 0.13
     cam = (mat_to[1] + mat_to[3] * 1.12) if mat_to else None
-    tot = None
+    tot, du_phong = None, None
     for y in range(y_min, y_max + 1, 12):
         c0, c1 = max(0, (x + le) * LC // W), min(LC, (x + bw - le) * LC // W + 1)
         r0, r1 = max(0, (y + le) * LD // H), min(LD, (y + bh - le) * LD // H + 1)
         phat = float(ban[r0:r1, c0:c1].sum()) * 4
         for (ox, oy, ow, oh) in da_dat:
-            dx = max(0, min(x + bw, ox + ow) - max(x, ox))
-            dy = max(0, min(y + bh, oy + oh) - max(y, oy))
-            phat += dx * dy / 400.0
+            ox, oy, ow, oh = ox - 18, oy - 18, ow + 36, oh + 36      # chừa khe 18 px giữa các khối chữ
+            dx = max(0, min(x + bw - le, ox + ow) - max(x + le, ox))
+            dy = max(0, min(y + bh - le, oy + oh) - max(y + le, oy))
+            phat += dx * dy / 60.0        # chữ đè chữ: phạt nặng
         tam = (y + bh / 2) / H
         if can_cam and uu_tien != "tren":                      # cận mặt: ưu tiên ngay dưới cằm
             phat += abs((y + le) / H - (cam + 0.015)) * 60
         else:
             muc = {"tren": 0.13, "giua": 0.40, "duoi": 0.68}.get(uu_tien, 0.4)
             phat += abs(tam - muc) * 40
+        mx = float(ban[r0:r1, c0:c1].max()) if r1 > r0 and c1 > c0 else 0.0
+        if mx >= 3.0:                     # chạm mặt: chỉ giữ làm phương án cuối (sẽ bị báo/không đặt)
+            if du_phong is None or phat < du_phong[0]:
+                du_phong = (phat, x, y, mx)
+            continue
         if tot is None or phat < tot[0]:
-            tot = (phat, x, y, float(ban[r0:r1, c0:c1].max()) if r1 > r0 and c1 > c0 else 0.0)
-    return tot
+            tot = (phat, x, y, mx)
+    return tot or du_phong
 
 
 # ---------------- phụ đề ----------------
@@ -250,6 +262,8 @@ def main():
         kh = dx["khoang"] if do_chat != "vua" else [k for k in dx["khoang"] if k["dai"] > 0.8]
         giu = D.giu_theo_kieu(dx["dau_cuoi"], kh, cheo if kieu == "tu-van" else "bai-tap",
                               float(pc["cat"].get("dem_truoc", 0.15)), float(pc["cat"].get("dem_sau", 0.10)))
+    if not giu and viec.get("long_tieng"):
+        giu = [dict(g, a=0.0, b=nguon[g["src"]]["dur"]) for g in dx["dau_cuoi"]]   # giọng AI: giữ nguyên nhịp đọc đã tính
     giu = giu or dx["giu_tu_van" if kieu == "tu-van" else "giu_bai_tap"]
     giu = [dict(g, src=g.get("src", 0)) for g in giu]
     for b in ke.get("bo", []):            # AI bỏ thêm: lời đáp của người phụ, câu nói hỏng…
@@ -394,28 +408,6 @@ def main():
             ly = int(H * AN_TOAN["tren"])
             vi_tri_logo = (lx, ly)
             da_dat_theo_t.append((0, 1e9, (lx - 10, ly - 10, anh_logo.width + 20, anh_logo.height + 20)))
-    # nhóm cụm theo câu để giữ 1 vị trí ổn định
-    nhom, cur = [], []
-    for c in cums:
-        if cur and c["a"] - cur[-1]["b"] > 0.6:
-            nhom.append(cur)
-            cur = []
-        cur.append(c)
-    if cur:
-        nhom.append(cur)
-    for ng in nhom:
-        bcs = [V.dan_phu_de(c["tu"], int(W * 0.84), int(hs.get("phu_de_co", 56))) for c in ng]
-        to = max(bcs, key=lambda b: b["w"] * b["h"])
-        ban, mat_to = vb.luoi(bd, ng[0]["a"], ng[-1]["b"])
-        r = xep(dict(to, le=0), ban, mat_to, "duoi", [], "giua")
-        if r is None:
-            continue
-        _, _, y, dinh = r
-        for c, bc in zip(ng, bcs):
-            lop.append({"loai": "phu", "a": c["a"], "b": c["b"], "bc": bc, "x": (W - bc["w"]) // 2,
-                        "y": y + (to["h"] - bc["h"]) // 2, "tu": c["tu"]})
-            da_dat_theo_t.append((c["a"], c["b"], ((W - to["w"]) // 2, y, to["w"], to["h"])))
-
     # ---- khối chữ ----
     chu_chay = [e for e in ke.get("chu", []) if e.get("kieu") == "chay"]
     chu = sorted([e for e in ke.get("chu", []) if e.get("kieu") != "chay"], key=lambda e: doi(e.get("t0", 0), e) or 0)
@@ -432,7 +424,7 @@ def main():
         for d in el.get("dong", []):
             if d.get("t0") is not None:
                 d["t0"] = max(t0, doi(d["t0"], el))
-        for co in (1.0, 0.85, 0.72):
+        for co in (1.0, 0.85, 0.72, 0.6):
             el["co"] = co
             if el.get("kieu") == "cong":
                 d0 = el["dong"][0]
@@ -453,8 +445,10 @@ def main():
             continue
         if co < 1.0:
             may_sua.append(f"«{el.get('id', i)}»: thu nhỏ còn {int(co * 100)}% để không che mặt/động tác")
-        if r[3] >= 3.0:
-            canh_bao.append(f"«{el.get('id', i)}» ({t0:.1f}–{t1:.1f}s) vẫn chạm vùng mặt — nên rút gọn chữ.")
+        if r[3] >= 3.0:                      # luật cứng: không che mặt → không đặt khối này
+            canh_bao.append(f"«{el.get('id', i)}» ({t0:.1f}–{t1:.1f}s) KHÔNG đặt được vì chỗ nào cũng che mặt — "
+                            f"đã bỏ. Rút gọn chữ, chia thành 2 khối ngắn hơn, hoặc dời sang lúc khung hình thoáng hơn.")
+            continue
         _, x, y, _ = r
         so_chu = sum(len(d["text"].split()) for d in el["dong"])
         if t1 - t0 < 0.25 * so_chu + 0.6:
@@ -467,6 +461,45 @@ def main():
                 if d.get("t0") is not None and d["t0"] > t0 + 0.2:
                     sfx_ds.append({"t": d["t0"], "loai": "click", "db": -24})
         da_dat_theo_t.append((t0, t1, (x, y, bc["w"], bc["h"])))
+
+    # ---- phụ đề: xếp SAU khối chữ, tự tránh khối chữ ----
+    an_phu_de = [0]
+    # nhóm cụm theo câu để giữ 1 vị trí ổn định
+    nhom, cur = [], []
+    for c in cums:
+        if cur and c["a"] - cur[-1]["b"] > 0.6:
+            nhom.append(cur)
+            cur = []
+        cur.append(c)
+    if cur:
+        nhom.append(cur)
+    for ng in nhom:
+        bcs = [V.dan_phu_de(c["tu"], int(W * 0.84), int(hs.get("phu_de_co", 56))) for c in ng]
+        to = max(bcs, key=lambda b: b["w"] * b["h"])
+        ban, mat_to = vb.luoi(bd, ng[0]["a"], ng[-1]["b"])
+        dang = [o for (a0, b0, o) in da_dat_theo_t if a0 < ng[-1]["b"] and ng[0]["a"] < b0]
+        r = xep(dict(to, le=0), ban, mat_to, "duoi", dang, "giua")   # phụ đề tránh khối chữ đã đặt
+        if r is None:
+            continue
+        if r[3] >= 3.0:
+            canh_bao.append(f"Phụ đề {ng[0]['a']:.1f}–{ng[-1]['b']:.1f}s chạm vùng mặt (không còn chỗ trống) — xem lại đoạn này.")
+        _, _, y, dinh = r
+        khoi_dat = list(da_dat_theo_t)
+        for c, bc in zip(ng, bcs):
+            px, pw = (W - bc["w"]) // 2, bc["w"]
+            py, ph = y + (to["h"] - bc["h"]) // 2, bc["h"]
+            de = any(a0 < c["b"] and c["a"] < b0 and
+                     max(0, min(px + pw, ox + ow) - max(px, ox)) * max(0, min(py + ph, oy + oh) - max(py, oy)) > 0
+                     for (a0, b0, (ox, oy, ow, oh)) in khoi_dat)
+            if de:                       # không còn chỗ: tạm ẩn phụ đề trong lúc khối chữ lớn hiện (như bản edit mẫu)
+                an_phu_de[0] += 1
+                continue
+            lop.append({"loai": "phu", "a": c["a"], "b": c["b"], "bc": bc, "x": (W - bc["w"]) // 2,
+                        "y": y + (to["h"] - bc["h"]) // 2, "tu": c["tu"]})
+            da_dat_theo_t.append((c["a"], c["b"], ((W - to["w"]) // 2, y, to["w"], to["h"])))
+
+    if an_phu_de[0]:
+        may_sua.append(f"Tạm ẩn {an_phu_de[0]} cụm phụ đề lúc khối chữ lớn hiện (không còn chỗ mà không che mặt/đè chữ)")
 
     # ---- bìa ----
     bia = ke.get("bia") or {}
@@ -676,17 +709,23 @@ def main():
         ban, _ = vb.luoi(bd, t0, t1)
         dang = [o for (a0, b0, o) in da_dat_theo_t if a0 < t1 and t0 < b0]
         tot = None
-        for dx_ in (0, -0.08, 0.08, -0.16, 0.16):
-            for dy_ in (0, 0.06, -0.06, 0.12, -0.12):
-                x = int(min(W * 0.95 - rong, max(W * 0.05, (cx + dx_) * W - rong / 2)))
-                y = int(min(H * 0.78 - cao, max(H * 0.07, (cy + dy_) * H - cao / 2)))
+        for gx in np.arange(0.05, 0.96, 0.03):          # thử khắp vùng an toàn, ưu tiên gần chỗ AI đề nghị
+            for gy in np.arange(0.07, 0.79, 0.02):
+                x = int(min(W * 0.95 - rong, max(W * 0.05, gx * W - rong / 2)))
+                y = int(min(H * 0.78 - cao, max(H * 0.07, gy * H - cao / 2)))
                 r0, r1, c0, c1 = y * LD // H, (y + cao) * LD // H + 1, x * LC // W, (x + rong) * LC // W + 1
-                phat = float(ban[r0:r1, c0:c1].max()) * 10 + abs(dx_) * 20 + abs(dy_) * 20
+                o_ = ban[r0:r1, c0:c1]
+                if o_.size and float(o_.max()) >= 3.0:     # chạm mặt → loại hẳn
+                    continue
+                phat = float(o_.mean() if o_.size else 0) * 10 + (abs(gx - cx) + abs(gy - cy)) * 15
                 for (ox, oy, ow, oh) in (dang if st["loai"] not in ("khoanh-tron", "gach-chan") else []):
                     if max(0, min(x + rong, ox + ow) - max(x, ox)) * max(0, min(y + cao, oy + oh) - max(y, oy)) > 0:
                         phat += 50
                 if tot is None or phat < tot[0]:
-                    tot = (phat, x, y, dx_ or dy_)
+                    tot = (phat, x, y, abs(gx - cx) + abs(gy - cy) > 0.05)
+        if tot is None:
+            canh_bao.append(f"Sticker «{st['loai']}» ({t0:.1f}–{t1:.1f}s) không có chỗ nào tránh được mặt — đã bỏ.")
+            continue
         _, x, y, doi_cho = tot
         if doi_cho:
             may_sua.append(f"Sticker «{st['loai']}» ({t0:.1f}s): dời chỗ để không che mặt/động tác/chữ")

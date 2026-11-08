@@ -42,7 +42,7 @@ def ngat_dong(text, f, rong, gian=0):
                 dong = thu
         ra.append(dong)
         # tránh dòng cuối chỉ có 1 chữ lẻ ("LẦN?"): kéo bớt chữ từ dòng trên xuống
-        while len(ra) >= 2 and len(ra[-1].split()) == 1 and len(ra[-2].split()) >= 3:
+        while len(ra) >= 2 and len(ra[-1].split()) == 1 and len(ra[-2].split()) >= 2:
             tren = ra[-2].split()
             moi = tren[-1] + " " + ra[-1]
             if do_dai(moi, f, gian) > rong:

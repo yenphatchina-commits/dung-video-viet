@@ -9,6 +9,8 @@
     dv.py nhac                            liệt kê nhạc của người dùng + nhạc mẫu tự tạo
     dv.py hoc <thư mục> --mau <video mẫu> [--tho <bản thô>]   học phong cách từ video mẫu
     dv.py phong-cach [ds | xem <tên> | xoa <tên>]              các phong cách đã học
+    dv.py long-tieng <dự án> --kich-ban <tệp.txt> [--giong "<tên>"] [--canh <clip>…]   lồng tiếng giọng đọc AI
+    dv.py giong [ds | them <tên> <tệp ghi âm> --dong-y]                giọng đọc có sẵn / giọng riêng
     dv.py doc <dự án> --video <tệp>… [--phu <cảnh minh hoạ>…] [--ho-so <tên>]
     dv.py dung <dự án> [--nhap]
     dv.py nang-cap                        hướng dẫn lấy bản mới
@@ -85,6 +87,11 @@ def main():
         print(f"Thư mục nhạc của bạn: {thu}")
         print("\n".join("  - " + os.path.join(thu, f) for f in ds) or "  (trống — chép nhạc có quyền dùng vào đây)")
         print("Nhạc mẫu tự tạo (không bản quyền): mau:nhe-nhang · mau:tuoi-sang · mau:tram")
+    elif lenh == "long-tieng":
+        bao_ban_moi()
+        chay("long_tieng.py", *con)
+    elif lenh == "giong":
+        chay("long_tieng.py", "giong", *con)
     elif lenh == "hoc":
         chay("hoc.py", *con)
     elif lenh == "phong-cach":

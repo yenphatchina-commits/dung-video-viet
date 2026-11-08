@@ -97,7 +97,7 @@ def xem_hinh(src, ts):
     oh = int(round(ow * ts["h"] / ts["w"] / 2) * 2)
     p = subprocess.Popen([C.ffmpeg(), "-v", "error", "-i", src, "-vf", f"fps={MAU_FPS},scale={ow}:{oh}",
                           "-f", "rawvideo", "-pix_fmt", "bgr24", "-"], stdout=subprocess.PIPE)
-    det = cv2.FaceDetectorYN.create(os.path.join(C.MO_HINH, "yunet.onnx"), "", (ow, oh), 0.6, 0.3, 50)
+    det = cv2.FaceDetectorYN.create(os.path.join(C.MO_HINH, "yunet.onnx"), "", (ow, oh), 0.45, 0.3, 50)
     luoi = (LUOI_C, LUOI_D) if oh >= ow else (LUOI_D, LUOI_C)
     mat, dong, truoc = [], [], None
     n = ow * oh * 3

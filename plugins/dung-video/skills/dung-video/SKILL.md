@@ -1,6 +1,6 @@
 ---
 name: dung-video
-description: Dựng video dọc 9:16 tiếng Việt (TikTok, Reels, Shorts) từ clip quay điện thoại cho người không biết edit — tự nghe lời, cắt khoảng ngừng, bỏ câu nói hỏng, thêm chữ chốt ý tránh mặt và tránh động tác, phụ đề tô chữ đang nói, chèn cảnh minh hoạ (B-roll), nhạc nền tự nhỏ khi có lời, hiệu ứng âm thanh, logo, intro/outro, phóng to đoạn quan trọng, chuyển cảnh 3D, sticker động, chữ cong, chữ chạy, hiệu ứng chữ xuất hiện, tăng tốc, giảm ồn, ảnh bìa phủ giây đầu, chuẩn âm lượng, xuất MP4 dọc và thêm khổ ngang YouTube / 4:5 Facebook. Dùng khi người dùng đưa video và nói "dựng", "edit", "làm video", "cắt video", "thêm chữ", "làm phụ đề", "làm ảnh bìa", hoặc "cài đặt dựng video", "kích hoạt mã", "kiểm tra máy", "nâng cấp skill", "học phong cách video này", "dựng theo phong cách …".
+description: Dựng video dọc 9:16 tiếng Việt (TikTok, Reels, Shorts) từ clip quay điện thoại cho người không biết edit — tự nghe lời, cắt khoảng ngừng, bỏ câu nói hỏng, thêm chữ chốt ý tránh mặt và tránh động tác, phụ đề tô chữ đang nói, chèn cảnh minh hoạ (B-roll), nhạc nền tự nhỏ khi có lời, hiệu ứng âm thanh, logo, intro/outro, phóng to đoạn quan trọng, chuyển cảnh 3D, sticker động, chữ cong, chữ chạy, hiệu ứng chữ xuất hiện, lồng tiếng giọng đọc AI tiếng Việt (23 giọng 3 miền), tăng tốc, giảm ồn, ảnh bìa phủ giây đầu, chuẩn âm lượng, xuất MP4 dọc và thêm khổ ngang YouTube / 4:5 Facebook. Dùng khi người dùng đưa video và nói "dựng", "edit", "làm video", "cắt video", "thêm chữ", "làm phụ đề", "làm ảnh bìa", hoặc "cài đặt dựng video", "kích hoạt mã", "kiểm tra máy", "nâng cấp skill", "học phong cách video này", "dựng theo phong cách …", "lồng tiếng", "giọng đọc AI", "đọc kịch bản này".
 ---
 
 # Dựng video
@@ -67,6 +67,9 @@ Cấu trúc đầy đủ và ví dụ: `tai-lieu/ke-hoach.md` (đọc trước k
 ## 4. Luật bắt buộc (máy tự giữ — không ghi đè)
 1. Ảnh bìa phủ kín 0–0,8 s (hồ sơ chỉnh 0,5–1 s); chữ mở đầu hiện từ giây 0,9 → khối mở đầu ghi `"theo":"ra","t0":0.9`.
 2. Chữ luôn trong vùng an toàn; không che mặt; cảnh cận mặt đặt dưới cằm; không che động tác (máy dò vùng chuyển động).
+   Áp dụng cho MỌI thứ đặt lên hình: khối chữ, phụ đề, sticker, chữ chạy. "Không che mặt" là luật cứng: máy xét mọi vị trí
+   mặt từng có trong lúc chữ hiện (kể cả lúc người cúi, nghiêng), không đặt chỗ chạm mặt; hết chỗ thì bỏ khối và báo.
+   Phụ đề xếp sau khối chữ; không còn chỗ thì tạm ẩn phụ đề lúc khối chữ lớn hiện.
    Không vừa chỗ thì máy thu nhỏ, vẫn không được thì báo — khi đó **rút gọn chữ**, không ép vị trí.
 3. Âm thanh: giọng nói luôn rõ nhất — nhạc tự nhỏ khi có lời, nhỏ dần cuối video; hiệu ứng nhỏ hơn giọng.
 4. Không bịa số, giá, công dụng. Lời nói có số mâu thuẫn (vd "mỗi bên 15 lần" nhưng đếm tới 10) → hỏi người dùng, không tự sửa.
@@ -93,7 +96,21 @@ Khi người dùng đưa video họ thích và nói "học phong cách", "làm g
 - Chỉ học **cách làm**. Không chép chữ, câu, logo, mặt, giọng, nhạc của video mẫu; không bắt chước để giả làm kênh khác.
 - Luật bắt buộc (mục 4) vẫn thắng phong cách: bìa 0,8 s, chữ không che mặt/động tác, không bịa số.
 
-## 7. Khác
+## 7. Lồng tiếng bằng giọng đọc AI
+Dùng khi video không có lời (chỉ cảnh thao tác, sản phẩm) hoặc người dùng bận không quay được.
+1. Có kịch bản thì dùng; chưa có → AI viết kịch bản ngắn (video 30–60 s ≈ 90–180 chữ) từ ý người dùng, **cho người dùng
+   duyệt trước khi đọc**. Không bịa công dụng, số liệu, giá. Mỗi đoạn một dòng; ghi số như thường (máy đọc được "299.000đ").
+2. Hỏi chọn giọng (`dv.py giong ds`): gợi ý theo khách của họ — miền Bắc: Ngọc Huyền (nữ), Minh Quân (nam);
+   miền Nam: Thùy Dung (nữ), Adam (nam). Ghi kịch bản ra `<dự án>/kich-ban.txt`.
+3. `dv.py long-tieng <dự án> --kich-ban <dự án>/kich-ban.txt --giong "<tên>" --canh <clip1> --canh <clip2> … --ho-so <tên>`
+   → đọc thành giọng, ghép nền mỗi câu một cảnh, rồi tự chạy bước đọc. Sau đó viết kế hoạch và dựng như mục 3–5
+   (kieu `tu-van`, phụ đề nên bật; dùng `chen` để đặt cảnh đúng lời).
+4. Chữ nước ngoài đọc sai (vd Zalo) → thêm vào `phat_am` của hồ sơ: `{"Zalo": "Da lô"}` rồi đọc lại.
+- **Giọng riêng (nhân bản):** chỉ giọng của chính người dùng hoặc người đã đồng ý rõ ràng. Hỏi xác nhận trước,
+  rồi `dv.py giong them "<tên>" <tệp ghi âm 5–10 s> --dong-y`. **Từ chối** nhân bản giọng người nổi tiếng, người khác
+  không có mặt đồng ý, hoặc để giả danh. Báo người dùng: video dùng giọng AI nên ghi chú "giọng đọc AI" khi đăng nếu nền tảng yêu cầu.
+
+## 8. Khác
 - «Nâng cấp skill» → `dv.py nang-cap` và làm theo hướng dẫn in ra.
 - Bước đọc in dòng 🔔 "Đã có bản mới" → báo người dùng một câu ở cuối, không chen ngang việc đang dựng.
 - Lỗi lạ → `dv.py kiem-may` trước, rồi đọc thông báo lỗi; nói với người dùng bằng lời dễ hiểu.

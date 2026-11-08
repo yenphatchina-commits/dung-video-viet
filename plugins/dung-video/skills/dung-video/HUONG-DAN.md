@@ -1,4 +1,4 @@
-# Hướng dẫn sử dụng — Dựng video (bản 1.2)
+# Hướng dẫn sử dụng — Dựng video (bản 1.3)
 
 ## Cần có
 - Máy Mac hoặc Windows 10/11, ổ đĩa trống ít nhất 5 GB, có mạng lúc cài.
@@ -36,6 +36,14 @@ Nói thẳng chỗ chưa ưng, càng cụ thể càng nhanh:
 - "tắt phụ đề" / "bật phụ đề"
 - "ảnh bìa lấy khung lúc chị cười ở giây 12"
 
+## Lồng tiếng bằng giọng đọc AI
+- Kéo các cảnh quay (không cần có lời) vào và nói: "lồng tiếng giọng nữ miền Bắc cho mấy cảnh này, nội dung giới thiệu ưu đãi 50 suất 299k".
+  Claude viết kịch bản cho bạn duyệt, đọc bằng giọng AI rồi dựng thành video có chữ, phụ đề, nhạc.
+- Có 23 giọng có sẵn (Bắc · Trung · Nam, nam và nữ) — nói "các giọng đọc" để xem. Âm thanh dùng được cho video kinh doanh.
+- Giọng riêng của bạn: ghi âm 5–10 giây giọng mình nói rõ, kéo vào và nói "thêm giọng của tôi". Chỉ nhân bản giọng
+  của chính bạn hoặc người đã đồng ý.
+- Chạy hoàn toàn trên máy, miễn phí. Lần đầu dùng máy tải thêm khoảng 0,6 GB.
+
 ## Học phong cách từ video bạn thích
 - Kéo video mẫu vào và nói: "học phong cách video này, đặt tên là sôi động". Có bản thô của video đó thì kéo vào luôn — học chính xác hơn.
 - Claude báo lại đã học được gì (cắt, chữ, màu, nhạc) và chỗ nào chưa làm được. Chưa đúng thì nói để sửa.
@@ -57,7 +65,7 @@ Có thể gửi luôn **logo** (ảnh PNG nền trong suốt), **intro** và **o
 - Bản dọc 9:16 dùng chung cho TikTok, Facebook Reels, YouTube Shorts (Shorts và Reels tối đa 3 phút).
 - Bản ngang 16:9 (YouTube) và 4:5 (bảng tin Facebook): video dọc ở giữa, hai bên là nền mờ của chính video.
 
-## Giới hạn bản 1.2
+## Giới hạn bản 1.3
 - Mỗi lượt tối đa **5 phút** clip (tính cả cảnh minh hoạ) và **1 GB**.
 - Chỉnh màu chỉ khi bạn yêu cầu — mặc định giữ màu gốc.
 

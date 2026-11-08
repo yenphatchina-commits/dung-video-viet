@@ -11,7 +11,10 @@ WIN = os.name == "nt"
 PY = os.path.join(VENV, "Scripts", "python.exe") if WIN else os.path.join(VENV, "bin", "python")
 MAC_M = sys.platform == "darwin" and platform.machine() == "arm64"
 
-CHUNG = ["numpy", "opencv-python-headless", "pillow", "cryptography"]
+CHUNG = ["numpy", "opencv-python-headless", "pillow", "cryptography",
+         # giọng đọc AI (VieNeu-TTS, Apache 2.0). ONNX Runtime ≥ 1.23 chặn đọc mô hình nằm trong bộ nhớ đệm Hugging Face
+         # (lỗi «External data path escapes model directory») → giữ 1.22.1 đã thử chạy được.
+         "vieneu", "onnxruntime==1.22.1"]
 NHAN_GIONG = ["mlx-whisper"] if MAC_M else ["faster-whisper"]
 
 CAI_UV = ('Mac: mở Terminal, dán:  curl -LsSf https://astral.sh/uv/install.sh | sh' if not WIN else
@@ -47,7 +50,7 @@ def kiem():
     dong(os.path.exists(PY), "Môi trường Python 3.12 của skill", "Nói: «cài đặt dựng video»")
     if os.path.exists(PY):
         thieu = subprocess.run([PY, "-c", "import importlib.util as u,sys;"
-                                "m=['numpy','cv2','PIL','cryptography','" + ("mlx_whisper" if MAC_M else "faster_whisper") + "'];"
+                                "m=['numpy','cv2','PIL','cryptography','vieneu','" + ("mlx_whisper" if MAC_M else "faster_whisper") + "'];"
                                 "print(' '.join(x for x in m if not u.find_spec(x)))"],
                                capture_output=True, text=True).stdout.strip()
         dong(not thieu, "Thư viện" + (f" (thiếu: {thieu})" if thieu else ""), "Nói: «cài đặt dựng video»")

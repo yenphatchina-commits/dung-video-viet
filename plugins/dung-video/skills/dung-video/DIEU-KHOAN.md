@@ -9,6 +9,8 @@
    Video làm ra thuộc về người mua.
 4. Mã vi phạm điều 1–2 có thể bị khoá ở bản cập nhật sau mà không hoàn tiền.
 5. Thành phần bên thứ ba giữ giấy phép riêng: font Be Vietnam Pro (SIL OFL, `font/OFL.txt`), Playfair Display (SIL OFL, `font/OFL-playfair.txt`),
-   mô hình YuNet (MIT, `mo-hinh/YUNET-LICENSE.txt`). Nhạc và hiệu ứng âm thanh có sẵn do skill tự tạo.
+   mô hình YuNet (MIT, `mo-hinh/YUNET-LICENSE.txt`),
+   giọng đọc VieNeu-TTS v3 Turbo của pnnbao-ump và MOSS Audio Tokenizer Nano của OpenMOSS (Apache 2.0, tải về khi dùng).
+   Giọng nhân bản chỉ được tạo từ giọng của chính người dùng hoặc người đã đồng ý; người dùng chịu trách nhiệm về việc này. Nhạc và hiệu ứng âm thanh có sẵn do skill tự tạo.
 6. Nhạc, hình ảnh người dùng tự đưa vào là trách nhiệm của người dùng.
 7. Skill được cung cấp "như hiện có"; tác giả hỗ trợ sửa lỗi qua các bản cập nhật.
