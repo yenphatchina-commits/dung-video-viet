@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Skill dựng video tiếng Việt",
-    "version": "1.3.0"
+    "version": "1.3.1"
   },
   "plugins": [
     {
       "name": "dung-video",
       "source": "./plugins/dung-video",
       "description": "Dựng video dọc tiếng Việt tự động cho người không biết edit: cắt khoảng ngừng, chữ chốt ý, phụ đề, ảnh bìa, cảnh minh hoạ, nhạc nền, logo, xuất TikTok/Reels/Shorts/YouTube/Facebook. Cần mã bản quyền.",
-      "version": "1.3.0"
+      "version": "1.3.1"
     }
   ]
 }

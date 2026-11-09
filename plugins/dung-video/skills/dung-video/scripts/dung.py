@@ -52,9 +52,23 @@ class BanDo:
 
 
 # ---------------- vùng bận (mặt + chuyển động) ----------------
+def loc_mat(mat):
+    """Bỏ hộp «mặt» xuất hiện lẻ loi (thường là bàn tay bị nhận nhầm): mặt thật phải có hộp gần đó ở khung kề (±0,5 s)."""
+    ra = []
+    for k, f in enumerate(mat):
+        giu_lai = []
+        for r in f:
+            cx, cy = r[0] + r[2] / 2, r[1] + r[3] / 2
+            ke = [q for j in range(max(0, k - 2), min(len(mat), k + 3)) if j != k for q in mat[j]]
+            if any(abs(q[0] + q[2] / 2 - cx) < 0.18 and abs(q[1] + q[3] / 2 - cy) < 0.12 for q in ke):
+                giu_lai.append(r)
+        ra.append(giu_lai)
+    return ra
+
+
 class VungBan:
     def __init__(self, du_an, nguon):
-        self.mat = C.doc_json(os.path.join(du_an, "doc", "mat.json"))["nguon"]
+        self.mat = [loc_mat(m) for m in C.doc_json(os.path.join(du_an, "doc", "mat.json"))["nguon"]]
         z = np.load(os.path.join(du_an, "doc", "dong.npz"))
         self.dong = [z[f"arr_{i}"] for i in range(len(nguon))]
         self.nguon = nguon
@@ -66,7 +80,7 @@ class VungBan:
         mp = C.doc_json(os.path.join(du_an, "doc", "mat.json")).get("phu", [])
         dp = os.path.join(du_an, "doc", "dong-phu.npz")
         zp = np.load(dp) if os.path.exists(dp) else None
-        self.mat_phu = mp
+        self.mat_phu = [loc_mat(m) for m in mp]
         self.zoom = []
         self.dong_phu = [zp[f"arr_{i}"] for i in range(len(mp))] if zp is not None else []
 
@@ -158,7 +172,7 @@ def xep(bc, ban, mat_to, uu_tien, da_dat, can):
             phat += abs((y + le) / H - (cam + 0.015)) * 60
         else:
             muc = {"tren": 0.13, "giua": 0.40, "duoi": 0.68}.get(uu_tien, 0.4)
-            phat += abs(tam - muc) * 40
+            phat += abs(tam - muc) * (130 if uu_tien == "tren" else 40)   # đã yêu cầu phía trên thì giữ phía trên
         mx = float(ban[r0:r1, c0:c1].max()) if r1 > r0 and c1 > c0 else 0.0
         if mx >= 3.0:                     # chạm mặt: chỉ giữ làm phương án cuối (sẽ bị báo/không đặt)
             if du_phong is None or phat < du_phong[0]:
@@ -467,7 +481,7 @@ def main():
     # nhóm cụm theo câu để giữ 1 vị trí ổn định
     nhom, cur = [], []
     for c in cums:
-        if cur and c["a"] - cur[-1]["b"] > 0.6:
+        if cur and (c["a"] - cur[-1]["b"] > 0.6 or c["b"] - cur[0]["a"] > 5.0):   # nhóm ngắn: phụ đề theo kịp vị trí mặt
             nhom.append(cur)
             cur = []
         cur.append(c)

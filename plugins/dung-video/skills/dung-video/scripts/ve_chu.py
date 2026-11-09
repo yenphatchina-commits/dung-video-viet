@@ -226,17 +226,22 @@ def ve_bia(anh_khung, dong, hs, mat=None):
     im = anh_khung.convert("RGBA").resize((C.W, C.H))
     toi = Image.new("RGBA", im.size, (0, 0, 0, 95))
     im.alpha_composite(toi)
-    el = {"kieu": "tieu-de", "dong": [{"text": d["text"], "vai": d.get("vai", "tieu-trang")} for d in dong], "co": 1.15}
-    bc = dan_khoi(el, hs, int(C.W * 0.9))
+    for co in (1.15, 1.0, 0.85, 0.72, 0.6, 0.5):     # thu nhỏ dần đến khi tiêu đề bìa không chạm mặt
+        el = {"kieu": "tieu-de", "dong": [{"text": d["text"], "vai": d.get("vai", "tieu-trang")} for d in dong], "co": co}
+        bc = dan_khoi(el, hs, int(C.W * 0.9))
+        le = bc["le"]
+        if mat is None:
+            y = int(C.H * 0.40 - bc["h"] / 2)
+            break
+        tren, duoi = mat[1] * C.H - mat[3] * C.H * 0.25, (mat[1] + mat[3] * 1.15) * C.H
+        if duoi + 20 + bc["h"] - 2 * le <= C.H * 0.78:      # ưu tiên dưới cằm
+            y = int(duoi + 20 - le)
+            break
+        if tren - 20 - (bc["h"] - 2 * le) >= C.H * 0.07:    # không đủ chỗ: đặt trên đầu
+            y = int(tren - 20 - bc["h"] + le)
+            break
+    else:                                                  # mặt quá to: đặt sát đáy vùng an toàn, cỡ nhỏ nhất
+        y = int(C.H * 0.78 - bc["h"] + le)
     k = ve_khoi(bc, hs)
-    if mat is None:
-        y = int(C.H * 0.40 - bc["h"] / 2)
-    else:
-        tren, duoi = mat[1] * C.H, (mat[1] + mat[3] * 1.15) * C.H
-        y_duoi = int(duoi + 20)                              # ưu tiên dưới cằm
-        if y_duoi + bc["h"] <= C.H * (1 - 0.22):
-            y = y_duoi
-        else:                                                # không đủ chỗ: đặt trên đầu
-            y = max(int(C.H * 0.07), int(tren - 30 - bc["h"]))
     im.alpha_composite(k, ((C.W - bc["w"]) // 2, y))
     return im

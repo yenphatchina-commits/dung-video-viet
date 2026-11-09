@@ -1,5 +1,10 @@
 # Các bản đã phát hành
 
+## 1.3.1
+- Bỏ hộp «mặt» xuất hiện lẻ loi (bàn tay bị nhận nhầm là mặt làm mất chỗ đặt chữ).
+- Phụ đề chia nhóm tối đa 5 giây để bám đúng vị trí mặt từng đoạn.
+- Chữ trên ảnh bìa tự thu nhỏ đến khi không chạm mặt; khối đã yêu cầu «phía trên» được giữ phía trên.
+
 ## 1.3.0
 - Lồng tiếng bằng giọng đọc AI chạy trên máy (VieNeu-TTS v3 Turbo, Apache 2.0): 23 giọng Bắc/Trung/Nam, giọng riêng
   (nhân bản, chỉ khi có đồng ý), bảng sửa phát âm chữ nước ngoài, tự ghép nền mỗi câu một cảnh; phụ đề lấy đúng chữ kịch bản.
