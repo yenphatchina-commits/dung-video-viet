@@ -5,14 +5,14 @@
 - Dải chữ chạy ngang (chữ chạy kiểu bảng tin).
 - Biểu thức ffmpeg cho chuyển cảnh: lat-3d (lật thẻ 3D), zoom-xoay, lia (lia máy), flash, mo (mờ chuyển).
 """
-import math, os
+import math, os, shutil
 from PIL import Image, ImageDraw, ImageFilter
 
 import chung as C
 import ve_chu as V
 
 FPS = C.FPS
-LOAI_STICKER = ("mui-ten", "khoanh-tron", "gach-chan", "sao", "tim", "tich", "x", "nhan")
+LOAI_STICKER = ("mui-ten", "khoanh-tron", "gach-chan", "sao", "tim", "tich", "x", "nhan", "vong-sang")
 LOAI_CHUYEN = ("lat-3d", "zoom-xoay", "lia", "flash", "mo")
 
 
@@ -112,10 +112,37 @@ def khung_sticker(loai, w, h, n, mau_hex, chu="", huong="phai"):
 
 def xuat_sticker(thu_muc, loai, w, h, giay, mau_hex, chu="", huong="phai"):
     """Ghi chuỗi PNG; trả mẫu đường dẫn cho ffmpeg (-framerate 30 -i …%04d.png)."""
+    shutil.rmtree(thu_muc, ignore_errors=True)          # xoá khung cũ của lần dựng trước
     os.makedirs(thu_muc, exist_ok=True)
     n = max(2, int(round(giay * FPS)))
     for k, im in enumerate(khung_sticker(loai, w, h, n, mau_hex, chu, huong)):
         im.save(os.path.join(thu_muc, f"{k:04d}.png"), compress_level=1)
+    return os.path.join(thu_muc, "%04d.png")
+
+
+def xuat_vong_sang(thu_muc, W, H, cx, cy, r, giay, mau_hex, toi=0.42):
+    """Khoanh vùng trọng tâm: làm tối cả khung trừ vòng tròn quanh (cx, cy), vòng sáng tự vẽ dần, nhịp nhẹ. Trả mẫu PNG cho ffmpeg."""
+    shutil.rmtree(thu_muc, ignore_errors=True)
+    os.makedirs(thu_muc, exist_ok=True)
+    n = max(2, int(round(giay * FPS)))
+    px, py = int(cx * W), int(cy * H)
+    lo = Image.new("L", (W, H), 255)
+    ImageDraw.Draw(lo).ellipse([px - r, py - r, px + r, py + r], fill=0)
+    lo = lo.filter(ImageFilter.GaussianBlur(10))
+    mau = V.mau(mau_hex)
+    for k in range(n):
+        t = k / FPS
+        con = (n - 1 - k) / FPS
+        muc = min(1.0, t / 0.15, (con + 0.02) / 0.15)      # hiện/tắt mượt
+        anh = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        den = Image.new("RGBA", (W, H), (0, 0, 0, 255))
+        den.putalpha(lo.point(lambda v, m_=toi * muc: int(v * m_)))
+        anh.alpha_composite(den)
+        d = ImageDraw.Draw(anh)
+        rr = r + int(5 * math.sin(t * 2 * math.pi * 1.2)) if t > 0.45 else r
+        ve = min(1.0, t / 0.45)
+        d.arc([px - rr, py - rr, px + rr, py + rr], start=-90, end=-90 + 360 * ve, fill=mau[:3] + (int(255 * muc),), width=10)
+        anh.save(os.path.join(thu_muc, f"{k:04d}.png"), compress_level=1)
     return os.path.join(thu_muc, "%04d.png")
 
 

@@ -43,6 +43,9 @@ Ghi `"theo": "ra"` nếu muốn tính theo giây thành phẩm (dùng cho khối
   {"loai": "mui-ten", "t0": 22, "t1": 26, "gan": "tai-lai", "huong": "trai"},
   {"loai": "nhan", "t0": 44, "t1": 48, "vi_tri": [0.8, 0.25], "chu": "HOT", "mau": "#FF5A1F"}
 ]
+// Bám lời: {"loai": "tich", "theo_loi": "trước khi ngủ", "dai": 1.8, ...} — hiện đúng lúc nói cụm đó (thay cho t0/t1; "lan": 2 = lần nói thứ 2)
+// Vòng sáng: {"loai": "vong-sang", "theo_loi": "chỗ lõm", "t1": 21.2, "vi_tri": [0.55, 0.665], "co": 0.13, "toi": 0.42}
+// Âm thanh: "am": {"sfx_tang": 4, "sfx": [{"theo_loi": "huyệt thần môn", "loai": "ting", "db": -18}]}
 // loai: mui-ten (huong: trai|phai|len|xuong) · khoanh-tron · gach-chan · sao · tim · tich · x · nhan (có "chu")
 // co = bề ngang so với khung (0,08–0,45). Máy tự dời nếu đè mặt, động tác hoặc chữ (khoanh-tron/gach-chan được đè chữ).
 ```

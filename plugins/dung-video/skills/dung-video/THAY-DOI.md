@@ -1,5 +1,12 @@
 # Các bản đã phát hành
 
+## 1.3.2
+- Cận mặt: khối chữ và phụ đề chỉ đặt dưới cằm (thử giữa, trái, phải). Ngoại lệ `vi_tri: "tren-dau"` khi tay đang thao tác ngay dưới cằm.
+- Sticker và hiệu ứng âm thanh bám đúng chữ đang nói (`theo_loi`).
+- Vòng sáng khoanh vùng trọng tâm (`vong-sang`): làm tối xung quanh, vòng tự vẽ quanh điểm cần nhìn, nằm dưới chữ.
+- `am.sfx_tang`: tăng chung mức hiệu ứng âm thanh.
+- Sửa lỗi treo khi dựng lại: tự dọn khung sticker cũ.
+
 ## 1.3.1
 - Bỏ hộp «mặt» xuất hiện lẻ loi (bàn tay bị nhận nhầm là mặt làm mất chỗ đặt chữ).
 - Phụ đề chia nhóm tối đa 5 giây để bám đúng vị trí mặt từng đoạn.

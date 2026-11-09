@@ -58,6 +58,8 @@ Cấu trúc đầy đủ và ví dụ: `tai-lieu/ke-hoach.md` (đọc trước k
   - `vao` của khối chữ: `pop` (tiêu đề), `go-chu` (danh sách, lời dặn), `truot` (thẻ), `nay` (cảnh báo, ưu đãi).
   - `chuyen_canh`: chỉ ở chỗ **đổi phần/ý lớn** (1–3 lần mỗi phút): `lat-3d`, `zoom-xoay`, `lia`, `flash`, `mo`.
     Không đặt giữa một câu đang nói. Cảnh chèn có thể ghi `"chuyen": "lia"`.
+  - **Sticker phải sát lời nói:** ghi `"theo_loi": "<cụm đúng lời>"` để hiện đúng lúc nói cụm đó (kèm `"dai"` giây). Âm thanh `am.sfx` cũng dùng được `theo_loi`.
+  - **`vong-sang`** khoanh vùng trọng tâm khi lời chỉ vào một điểm (huyệt, chỗ đau, sản phẩm): nhìn khung hình lúc đó để lấy `vi_tri` [x, y] thật chính xác, `co` là bán kính so với bề ngang.
   - `sticker`: `tich` cạnh điều nên làm, `x` cạnh điều không nên, `mui-ten` chỉ vào thẻ chữ, `khoanh-tron`/`gach-chan`
     nhấn vào vật trong hình, `sao`/`tim`/`nhan` (huy hiệu có chữ, vd "HOT") cho ưu đãi, lời kết. Tối đa ~1 sticker/10 s.
   - Khối `cong` (chữ cong) cho tên thương hiệu, khẩu hiệu ngắn; khối `chay` (chữ chạy ngang) cho ưu đãi, lời kêu gọi cuối.
@@ -70,6 +72,7 @@ Cấu trúc đầy đủ và ví dụ: `tai-lieu/ke-hoach.md` (đọc trước k
    Áp dụng cho MỌI thứ đặt lên hình: khối chữ, phụ đề, sticker, chữ chạy. "Không che mặt" là luật cứng: máy xét mọi vị trí
    mặt từng có trong lúc chữ hiện (kể cả lúc người cúi, nghiêng), không đặt chỗ chạm mặt; hết chỗ thì bỏ khối và báo.
    Phụ đề xếp sau khối chữ; không còn chỗ thì tạm ẩn phụ đề lúc khối chữ lớn hiện.
+   Cận mặt: khối chữ và phụ đề chỉ ở dưới cằm. Chỉ khi tay đang thao tác ngay dưới cằm mới ghi `"vi_tri": "tren-dau"`.
    Không vừa chỗ thì máy thu nhỏ, vẫn không được thì báo — khi đó **rút gọn chữ**, không ép vị trí.
 3. Âm thanh: giọng nói luôn rõ nhất — nhạc tự nhỏ khi có lời, nhỏ dần cuối video; hiệu ứng nhỏ hơn giọng.
 4. Không bịa số, giá, công dụng. Lời nói có số mâu thuẫn (vd "mỗi bên 15 lần" nhưng đếm tới 10) → hỏi người dùng, không tự sửa.
