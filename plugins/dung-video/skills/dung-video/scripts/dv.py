@@ -11,6 +11,11 @@
     dv.py phong-cach [ds | xem <tên> | xoa <tên>]              các phong cách đã học
     dv.py long-tieng <dự án> --kich-ban <tệp.txt> [--giong "<tên>"] [--canh <clip>…]   lồng tiếng giọng đọc AI
     dv.py giong [ds | them <tên> <tệp ghi âm> --dong-y]                giọng đọc có sẵn / giọng riêng
+    dv.py khoa-anh                                                     lưu mã Pixabay (ảnh/video minh hoạ miễn phí)
+    dv.py anh-mien-phi <dự án> --tu "<từ khoá tiếng Anh>"… [--so 4]   tìm ảnh/video minh hoạ theo lời nói
+    dv.py them-phu <dự án> <clip>…                                     thêm clip đã chọn làm cảnh phụ
+    dv.py the-minh-hoa <dự án> --ten <tên> --bieu-tuong <tên biểu tượng> --chu "…" [--chu-phu "…"] [--dau nen|khong-nen|canh-bao]
+                                                                       thẻ minh hoạ động (biểu tượng + chữ), tự thêm làm cảnh phụ
     dv.py doc <dự án> --video <tệp>… [--phu <cảnh minh hoạ>…] [--ho-so <tên>]
     dv.py dung <dự án> [--nhap]
     dv.py nang-cap                        hướng dẫn lấy bản mới
@@ -90,6 +95,14 @@ def main():
     elif lenh == "long-tieng":
         bao_ban_moi()
         chay("long_tieng.py", *con)
+    elif lenh == "khoa-anh":
+        chay("anh_mien_phi.py", "khoa")
+    elif lenh == "anh-mien-phi":
+        chay("anh_mien_phi.py", "tim", *con)
+    elif lenh == "them-phu":
+        chay("anh_mien_phi.py", "them-phu", *con)
+    elif lenh == "the-minh-hoa":
+        chay("the_minh_hoa.py", *con)
     elif lenh == "giong":
         chay("long_tieng.py", "giong", *con)
     elif lenh == "hoc":

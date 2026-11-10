@@ -425,7 +425,7 @@ def main():
                 if m_ is None:
                     canh_bao.append(f"Hiệu ứng âm thanh: không thấy cụm «{s['theo_loi']}» trong lời — bỏ qua.")
                     continue
-                sfx_ds.append({"t": m_[0], "loai": s["loai"], "db": float(s.get("db", -18))})
+                sfx_ds.append({"t": max(0.0, m_[0] - float(s.get("truoc", 0))), "loai": s["loai"], "db": float(s.get("db", -18))})
             else:
                 sfx_ds.append({"t": doi(s["t"], s), "loai": s["loai"], "db": float(s.get("db", -18))})
     if am.get("sfx_tu_dong", hs.get("sfx_tu_dong", True)):
@@ -551,6 +551,10 @@ def main():
         _, _, y, dinh = r
         khoi_dat = list(da_dat_theo_t)
         for c, bc in zip(ng, bcs):
+            if any(ch["t0"] - 0.05 < c["b"] and c["a"] < ch["t1"] + 0.05 and
+                   os.path.basename(phu[ch["phu"]]["duong"]).startswith("the-") for ch in chen):
+                an_phu_de[0] += 1                 # thẻ minh hoạ đã có chữ nói đúng ý → không chồng phụ đề lên
+                continue
             px, pw = (W - bc["w"]) // 2, bc["w"]
             py, ph = y + (to["h"] - bc["h"]) // 2, bc["h"]
             de = any(a0 < c["b"] and c["a"] < b0 and

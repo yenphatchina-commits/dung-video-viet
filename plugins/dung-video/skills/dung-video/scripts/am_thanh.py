@@ -11,7 +11,15 @@ import chung as C
 
 SR = 48000
 THU_MUC = os.path.join(C.NHA, "am-thanh-tao")
-LOAI_SFX = ("pop", "whoosh", "ting", "click", "bum")
+LOAI_SFX = ("pop", "whoosh", "ting", "click", "bum", "chuong", "lap-lanh", "bung-tay",
+            "dung", "sai", "don-nen", "canh-bao", "tick")
+# Ý nghĩa (để AI chọn đúng chỗ):
+#   dung      — điều NÊN làm / tin tốt: hợp âm trưởng đi lên, sáng
+#   sai       — điều KHÔNG NÊN: hai nốt trầm đi xuống kiểu "trả lời sai"
+#   canh-bao  — dấu hiệu nguy hiểm / phải đi khám: hai nhịp trầm nặng "đùng… đùng"
+#   don-nen   — tiếng dồn lên trước câu quan trọng (đặt "truoc": 0.7 để kết thúc đúng lúc nói)
+#   tick      — liệt kê từng ý, rất nhỏ
+#   chuong    — tên thương hiệu / lời khuyên chốt
 KIEU_NHAC = ("nhe-nhang", "tuoi-sang", "tram")
 
 
@@ -61,6 +69,71 @@ def sfx(loai):
         t = np.arange(n) / SR
         f = 120 * np.exp(-t * 6) + 45
         x = np.sin(2 * np.pi * np.cumsum(f) / SR) * _env(n, 0.003, 0.25)
+    elif loai == "dung":                   # C6-E6-G6-C7 nhanh, sáng
+        n = int(0.9 * SR)
+        x = np.zeros(n)
+        for j, f in enumerate((1046.5, 1318.5, 1568.0, 2093.0)):
+            i0 = int(j * 0.075 * SR)
+            tt = np.arange(n - i0) / SR
+            x[i0:] += (np.sin(2 * np.pi * f * tt) + 0.25 * np.sin(4 * np.pi * f * tt)) * _env(n - i0, 0.002, 0.22)
+    elif loai == "sai":                    # hai nốt trầm đi xuống, hơi rè
+        n = int(0.6 * SR)
+        x = np.zeros(n)
+        for t0, f in ((0.0, 311.1), (0.2, 233.1)):
+            i0 = int(t0 * SR)
+            ln = int(0.24 * SR)
+            tt = np.arange(ln) / SR
+            ton = sum(np.sin(2 * np.pi * f * k * tt) / k for k in (1, 3, 5, 7))
+            x[i0:i0 + ln] += ton * np.minimum(1, tt / 0.005) * np.exp(-tt / 0.16)
+        x = np.convolve(x, np.ones(12) / 12, mode="same")
+    elif loai == "canh-bao":               # "đùng… đùng" nặng
+        n = int(1.3 * SR)
+        x = np.zeros(n)
+        for t0 in (0.0, 0.42):
+            i0 = int(t0 * SR)
+            ln = int(0.8 * SR)
+            tt = np.arange(ln) / SR
+            f = 70 * np.exp(-tt * 3) + 38
+            hit = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt / 0.35)
+            hit[: int(0.01 * SR)] += rng.standard_normal(int(0.01 * SR)) * 0.4
+            x[i0:i0 + ln] += hit[: n - i0]
+    elif loai == "don-nen":                # tiếng dồn lên 0,7 s, dừng gọn
+        n = int(0.7 * SR)
+        t = np.linspace(0, 1, n)
+        f = 180 + 1300 * t ** 2
+        x = np.sin(2 * np.pi * np.cumsum(f) / SR) * 0.5
+        no = rng.standard_normal(n)
+        cs = np.cumsum(np.insert(no, 0, 0))
+        k = (30 - 26 * t).astype(int) + 1
+        idx = np.arange(n)
+        lo = np.maximum(0, idx - k)
+        x = (x + (cs[idx + 1] - cs[lo]) / (idx + 1 - lo) * 0.8) * t ** 1.6
+        x[-int(0.01 * SR):] *= np.linspace(1, 0, int(0.01 * SR))
+    elif loai == "tick":
+        n = int(0.06 * SR)
+        tt = np.arange(n) / SR
+        x = np.sin(2 * np.pi * 1900 * tt) * _env(n, 0.0005, 0.01)
+    elif loai == "chuong":                 # chuông hai nốt "ding-dong" (nhấn lời khuyên quan trọng)
+        n = int(1.2 * SR)
+        t = np.arange(n) / SR
+        x = np.zeros(n)
+        for t0, f in ((0.0, 1046.5), (0.22, 784.0)):
+            i0 = int(t0 * SR)
+            tt = t[: n - i0]
+            x[i0:] += sum(a * np.sin(2 * np.pi * f * k * tt) for k, a in ((1, 1), (2.76, 0.3), (5.4, 0.1))) * _env(n - i0, 0.002, 0.35)
+    elif loai == "lap-lanh":               # chuỗi nốt cao lấp lánh đi lên (điều tốt, ưu đãi, lời cảm ơn)
+        n = int(0.9 * SR)
+        x = np.zeros(n)
+        for j, f in enumerate((1568, 1976, 2349, 2637, 3136, 3951)):
+            i0 = int(j * 0.06 * SR)
+            tt = np.arange(n - i0) / SR
+            x[i0:] += np.sin(2 * np.pi * f * tt) * _env(n - i0, 0.001, 0.12) * (0.9 - j * 0.08)
+    elif loai == "bung-tay":               # tiếng búng tay khô, gọn (liệt kê từng ý)
+        n = int(0.12 * SR)
+        no = rng.standard_normal(n)
+        tt = np.arange(n) / SR
+        x = (no * 0.7 + np.sin(2 * np.pi * 2600 * tt) * 0.5) * _env(n, 0.0003, 0.012)
+        x = np.convolve(x, [1, -0.6], mode="same")
     else:
         raise ValueError(loai)
     return x / (np.abs(x).max() + 1e-9) * 0.9

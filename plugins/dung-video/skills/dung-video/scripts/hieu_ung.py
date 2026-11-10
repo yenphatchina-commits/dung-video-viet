@@ -6,7 +6,7 @@
 - Biểu thức ffmpeg cho chuyển cảnh: lat-3d (lật thẻ 3D), zoom-xoay, lia (lia máy), flash, mo (mờ chuyển).
 """
 import math, os, shutil
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 import chung as C
 import ve_chu as V
@@ -237,3 +237,82 @@ def bo_loc_chuyen(ds, W, H):
     for c in theo("mo"):
         loc.append(f"boxblur=luma_radius=24:luma_power=2:enable='between(t,{c['t'] - c['dai'] / 2:.3f},{c['t'] + c['dai'] / 2:.3f})'")
     return ",".join(loc)
+
+
+# ---------------- thẻ minh hoạ bằng biểu tượng (Material Symbols, Apache 2.0) ----------------
+def _ma_bieu_tuong():
+    p = os.path.join(C.FONT, "MaterialSymbolsRounded.codepoints")
+    return {d.split()[0]: chr(int(d.split()[1], 16)) for d in open(p, encoding="utf-8") if d.strip()}
+
+
+def the_minh_hoa(thu_muc, bieu_tuong, chu, hs, giay=2.2, dau="", chu_phu=""):
+    """Thẻ toàn khung 1080×1920 dùng làm cảnh trám: nền tối theo màu thương hiệu, biểu tượng lớn bật ra rồi nổi nhẹ,
+    chữ ngắn bên dưới; dau = "nen" (dấu tích xanh) | "khong-nen" (dấu X đỏ) | "canh-bao" (tam giác vàng). Trả mẫu PNG."""
+    import numpy as np
+    shutil.rmtree(thu_muc, ignore_errors=True)
+    os.makedirs(thu_muc, exist_ok=True)
+    W, H = C.W, C.H
+    ma = _ma_bieu_tuong()
+    if bieu_tuong not in ma:
+        raise SystemExit(f"Không có biểu tượng «{bieu_tuong}». Tra tên ở fonts.google.com/icons")
+    def f_icon(co):
+        f = ImageFont.truetype(os.path.join(C.FONT, "MaterialSymbolsRounded.ttf"), int(co))
+        try:
+            f.set_variation_by_axes([1, 0, 48, 600])         # FILL=1 (đặc), GRAD, opsz, wght
+        except Exception:
+            pass
+        return f
+    nhan = V.mau(hs["mau_nhan"])
+    mau_dau = {"nen": (38, 178, 92), "khong-nen": (225, 56, 62), "canh-bao": (245, 180, 0)}.get(dau)
+    ky_dau = {"nen": "check_circle", "khong-nen": "cancel", "canh-bao": "warning"}.get(dau)
+    # nền: dải màu tối → hơi ánh màu nhấn, cố định cho mọi khung
+    y = np.linspace(0, 1, H)[:, None]
+    toi = np.array([20, 20, 26], np.float32)
+    ve = np.array(nhan[:3], np.float32) * 0.22 + toi * 0.78
+    nen_arr = (toi * (1 - y) + ve * y)[:, None, :].repeat(W, 1).astype(np.uint8)
+    nen = Image.fromarray(nen_arr.reshape(H, W, 3)).convert("RGBA")
+    vong = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(vong).ellipse([W / 2 - 330, H * 0.36 - 330, W / 2 + 330, H * 0.36 + 330], fill=nhan[:3] + (40,))
+    nen.alpha_composite(vong.filter(ImageFilter.GaussianBlur(40)))
+    el = {"kieu": "tieu-de", "can": "giua", "dong": [{"text": chu, "vai": "tieu-trang"}] +
+          ([{"text": chu_phu, "vai": "tieu-vang"}] if chu_phu else []), "co": 0.85}
+    bc = V.dan_khoi(el, hs, int(W * 0.86))
+    khoi_chu = V.ve_khoi(bc, hs)
+    n = max(2, int(round(giay * FPS)))
+    for k in range(n):
+        t = k / FPS
+        im = nen.copy()
+        sc = 0.5 + 0.5 * _ease(t / 0.32) + 0.06 * math.sin(math.pi * min(1, t / 0.32))
+        noi = 10 * math.sin(t * 2 * math.pi * 0.7) if t > 0.35 else 0
+        co = int(460 * sc)
+        f = f_icon(co)
+        lop = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        d = ImageDraw.Draw(lop)
+        d.text((W / 2, H * 0.36 + noi), ma[bieu_tuong], font=f, fill=(255, 255, 255, 255), anchor="mm")
+        if ky_dau and t > 0.25:
+            sd = _ease((t - 0.25) / 0.2)
+            fd = f_icon(int(190 * sd))
+            cx, cy = W / 2 + 200, H * 0.36 + 170 + noi
+            d.ellipse([cx - 92 * sd, cy - 92 * sd, cx + 92 * sd, cy + 92 * sd], fill=(255, 255, 255, 255))
+            d.text((cx, cy), ma[ky_dau], font=fd, fill=mau_dau + (255,), anchor="mm")
+        bong = lop.copy()
+        bong.putalpha(lop.getchannel("A").point(lambda v: int(v * 0.5)))
+        im.alpha_composite(Image.new("RGBA", im.size, (0, 0, 0, 0)))
+        im.alpha_composite(bong.filter(ImageFilter.GaussianBlur(16)), (0, 14))
+        im.alpha_composite(lop)
+        if t > 0.18:
+            a = _ease((t - 0.18) / 0.25)
+            kc = khoi_chu.copy()
+            kc.putalpha(kc.getchannel("A").point(lambda v, a=a: int(v * a)))
+            im.alpha_composite(kc, ((W - bc["w"]) // 2, int(H * 0.60 + 40 * (1 - a))))
+        im.convert("RGB").save(os.path.join(thu_muc, f"{k:04d}.png"), compress_level=1)
+    return os.path.join(thu_muc, "%04d.png")
+
+
+def xuat_the_minh_hoa(ra_mp4, bieu_tuong, chu, hs, giay=2.2, dau="", chu_phu=""):
+    tam = ra_mp4 + ".khung"
+    mau = the_minh_hoa(tam, bieu_tuong, chu, hs, giay, dau, chu_phu)
+    C.sh([C.ffmpeg(), "-v", "error", "-y", "-framerate", str(FPS), "-i", mau, "-c:v", "libx264", "-preset", "veryfast",
+          "-crf", "18", "-pix_fmt", "yuv420p", ra_mp4])
+    shutil.rmtree(tam, ignore_errors=True)
+    return ra_mp4

@@ -1,5 +1,13 @@
 # Các bản đã phát hành
 
+## 1.4.0
+- Tìm ảnh/video minh hoạ miễn phí theo lời nói: Pixabay (mã miễn phí, hộp thoại để tự dán), Pexels (nếu đã có mã),
+  Wikimedia Commons khi chưa có mã (chỉ ảnh dùng thương mại được). Ảnh tĩnh tự thành cảnh dọc chuyển động chậm.
+- `dv.py them-phu`: thêm cảnh phụ vào dự án đã đọc mà không cần nghe lại lời.
+- Thẻ minh hoạ động tự tạo từ biểu tượng Material Symbols (Apache 2.0): `dv.py the-minh-hoa`, dấu nên/không nên/cảnh báo;
+  phụ đề tự ẩn khi thẻ hiện.
+- Bộ tiếng theo ý nghĩa: dung (nên), sai (không nên), canh-bao, don-nen (dồn lên, đặt trước câu bằng `truoc`), tick, chuong, lap-lanh, bung-tay.
+
 ## 1.3.3
 - Bàn tay múa trước ngực không còn bị nhận nhầm là khuôn mặt thứ hai (bỏ hộp mờ khi khung đã có mặt rõ; mặt chính = rõ nhất × to nhất).
 

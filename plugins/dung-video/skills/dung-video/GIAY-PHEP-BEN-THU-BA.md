@@ -10,3 +10,4 @@
 | Whisper large-v3-turbo | OpenAI (bản chuyển mlx-community / faster-whisper) | MIT | Nhận giọng; tải về khi cài |
 
 Nhạc nền và hiệu ứng âm thanh, sticker động: do skill tự tạo bằng code.
+| Material Symbols (Rounded) | Google | Apache 2.0 (`font/LICENSE-material-symbols.txt`) | Biểu tượng cho thẻ minh hoạ |

@@ -64,6 +64,12 @@ Cấu trúc đầy đủ và ví dụ: `tai-lieu/ke-hoach.md` (đọc trước k
     nhấn vào vật trong hình, `sao`/`tim`/`nhan` (huy hiệu có chữ, vd "HOT") cho ưu đãi, lời kết. Tối đa ~1 sticker/10 s.
   - Khối `cong` (chữ cong) cho tên thương hiệu, khẩu hiệu ngắn; khối `chay` (chữ chạy ngang) cho ưu đãi, lời kêu gọi cuối.
   - Không có sẵn hiệu ứng người dùng muốn → nói rõ, đề xuất hiệu ứng gần nhất.
+- **Hiệu ứng âm thanh theo Ý NGHĨA** (người dùng chê "một màu" khi tiếng nào cũng giống nhau, chỗ nào cũng có):
+  tắt tự động (`"sfx_tu_dong": false`) và đặt 10–15 tiếng cho video 45 s bằng `theo_loi`, mỗi loại một vai:
+  `dung` (điều NÊN làm, tin tốt, con số chốt) · `sai` (điều KHÔNG NÊN) · `canh-bao` (dấu hiệu nguy hiểm, phải đi khám)
+  · `don-nen` với `"truoc": 0.7` (dồn lên ngay trước câu hỏi mở đầu / câu cảnh báo) · `tick` (liệt kê từng ý, rất nhỏ)
+  · `chuong` (tên cơ sở, lời khuyên chốt) · `whoosh` (vào cảnh chèn) · `lap-lanh` (lời kết, ưu đãi).
+  Mức to tạo nhấn nhá: điểm chính −9…−12 dB, phụ −18…−21, tick −20…−24. Không đặt 2 tiếng cách nhau < 1 s (trừ dồn lên + nhịp chính).
 - **am.sfx_tu_dong**: mặc định bật (tiếng nhẹ khi chữ hiện, "vút" khi hết bìa và khi vào cảnh chèn). Người dùng thấy ồn → tắt.
 
 ## 4. Luật bắt buộc (máy tự giữ — không ghi đè)
@@ -113,7 +119,23 @@ Dùng khi video không có lời (chỉ cảnh thao tác, sản phẩm) hoặc n
   rồi `dv.py giong them "<tên>" <tệp ghi âm 5–10 s> --dong-y`. **Từ chối** nhân bản giọng người nổi tiếng, người khác
   không có mặt đồng ý, hoặc để giả danh. Báo người dùng: video dùng giọng AI nên ghi chú "giọng đọc AI" khi đăng nếu nền tảng yêu cầu.
 
-## 8. Khác
+## 8. Ảnh / video minh hoạ
+- **Ưu tiên hình của chính người dùng** (clip quay ở cơ sở, ảnh họ đưa): `dv.py them-phu <dự án> <clip>…`.
+  Ảnh tĩnh → clip trước: ảnh tự thành clip dọc có nền mờ khi dùng `anh-mien-phi`; ảnh người dùng đưa thì tạo bằng
+  `anh_mien_phi.anh_thanh_clip` (xem mã). Rồi `chen` đúng lúc lời nói nhắc tới.
+- **Kiểm bản quyền ảnh người dùng đưa:** ảnh có logo/chữ của tổ chức khác (bệnh viện, báo, thương hiệu) → KHÔNG dùng, không cắt bỏ logo;
+  giải thích cho người dùng. Ảnh không rõ nguồn → nhắc họ tự chịu trách nhiệm, nên dùng ảnh có giấy phép.
+- **Thẻ minh hoạ tự động (không cần mã, không bản quyền)** — cách trám nhanh nhất khi không có hình thật hợp:
+  `dv.py the-minh-hoa <dự án> --ten <tên> --bieu-tuong <tên Material Symbols> --chu "<2–4 chữ>" --chu-phu "<ý phụ>" --dau nen|khong-nen|canh-bao`
+  → thẻ 2,4 s biểu tượng lớn + chữ, tự thêm làm cảnh phụ; rồi `chen` đúng lúc nói. Dùng cho điều nên làm (`nen`), không nên
+  (`khong-nen`), con số/thời gian (biểu tượng `timer`), vật dụng (giày `footprint`, ghế `chair`). Khi đã có thẻ thì bỏ khối chữ
+  trùng ý và bỏ sticker ✓/✗ trùng (thẻ đã có dấu); phụ đề tự ẩn lúc thẻ hiện. Không phủ thẻ lên câu cảnh báo, mở đầu, kêu gọi cuối.
+- **Ảnh miễn phí trên mạng:** `dv.py anh-mien-phi <dự án> --tu "<từ khoá tiếng Anh>"…`. Có mã Pixabay (người dùng tự lưu bằng
+  `dv.py khoa-anh` — hộp thoại để họ tự dán, KHÔNG bao giờ tự nhập mã thay họ) → ảnh + video đẹp; không có mã → Wikimedia
+  Commons (chỉ CC0/công cộng/CC BY; CC BY phải ghi tác giả). Xem `doc/bang-ung-vien-*.jpg`, chỉ chọn cảnh thật sự hợp;
+  không đạt thì nói thẳng và đề xuất dùng clip của người dùng. Không trình bày người trong ảnh như khách/bệnh nhân của cơ sở.
+
+## 9. Khác
 - «Nâng cấp skill» → `dv.py nang-cap` và làm theo hướng dẫn in ra.
 - Bước đọc in dòng 🔔 "Đã có bản mới" → báo người dùng một câu ở cuối, không chen ngang việc đang dựng.
 - Lỗi lạ → `dv.py kiem-may` trước, rồi đọc thông báo lỗi; nói với người dùng bằng lời dễ hiểu.

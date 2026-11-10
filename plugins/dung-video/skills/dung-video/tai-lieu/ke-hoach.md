@@ -45,7 +45,9 @@ Ghi `"theo": "ra"` nếu muốn tính theo giây thành phẩm (dùng cho khối
 ]
 // Bám lời: {"loai": "tich", "theo_loi": "trước khi ngủ", "dai": 1.8, ...} — hiện đúng lúc nói cụm đó (thay cho t0/t1; "lan": 2 = lần nói thứ 2)
 // Vòng sáng: {"loai": "vong-sang", "theo_loi": "chỗ lõm", "t1": 21.2, "vi_tri": [0.55, 0.665], "co": 0.13, "toi": 0.42}
-// Âm thanh: "am": {"sfx_tang": 4, "sfx": [{"theo_loi": "huyệt thần môn", "loai": "ting", "db": -18}]}
+// Âm thanh: "am": {"sfx_tu_dong": false, "sfx": [{"theo_loi": "hạn chế leo dốc", "loai": "sai", "db": -11},
+//            {"theo_loi": "sưng nóng đỏ đau", "loai": "don-nen", "truoc": 0.7, "db": -16}, {"theo_loi": "sưng nóng đỏ đau", "loai": "canh-bao", "db": -9}]}
+// loại tiếng: dung · sai · canh-bao · don-nen · tick · chuong · lap-lanh · bung-tay · whoosh · pop · ting · click · bum
 // loai: mui-ten (huong: trai|phai|len|xuong) · khoanh-tron · gach-chan · sao · tim · tich · x · nhan (có "chu")
 // co = bề ngang so với khung (0,08–0,45). Máy tự dời nếu đè mặt, động tác hoặc chữ (khoanh-tron/gach-chan được đè chữ).
 ```
