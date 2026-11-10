@@ -1,5 +1,8 @@
 # Các bản đã phát hành
 
+## 1.3.3
+- Bàn tay múa trước ngực không còn bị nhận nhầm là khuôn mặt thứ hai (bỏ hộp mờ khi khung đã có mặt rõ; mặt chính = rõ nhất × to nhất).
+
 ## 1.3.2
 - Cận mặt: khối chữ và phụ đề chỉ đặt dưới cằm (thử giữa, trái, phải). Ngoại lệ `vi_tri: "tren-dau"` khi tay đang thao tác ngay dưới cằm.
 - Sticker và hiệu ứng âm thanh bám đúng chữ đang nói (`theo_loi`).

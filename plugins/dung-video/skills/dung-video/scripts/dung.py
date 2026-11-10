@@ -57,7 +57,10 @@ def loc_mat(mat):
     ra = []
     for k, f in enumerate(mat):
         giu_lai = []
+        ro = max((r[4] for r in f), default=0)
         for r in f:
+            if ro >= 0.8 and r[4] < 0.6:         # đã có mặt rõ: hộp mờ đi kèm thường là bàn tay → bỏ
+                continue
             cx, cy = r[0] + r[2] / 2, r[1] + r[3] / 2
             ke = [q for j in range(max(0, k - 2), min(len(mat), k + 3)) if j != k for q in mat[j]]
             if any(abs(q[0] + q[2] / 2 - cx) < 0.18 and abs(q[1] + q[3] / 2 - cy) < 0.12 for q in ke):
@@ -124,8 +127,8 @@ class VungBan:
                 x0, x1 = max(0, x - w * 0.15), min(1, x + w * 1.15)
                 y0, y1 = max(0, y - h * 0.25), min(1, y + h * 1.12)   # tới cằm
                 mat_hop[int(y0 * LD):int(np.ceil(y1 * LD)), int(x0 * LC):int(np.ceil(x1 * LC))] = 8.0
-                if mat_to is None or w * h > mat_to[2] * mat_to[3]:
-                    mat_to = (x, y, w, h)
+                if mat_to is None or s * w * h > mat_to[4] * mat_to[2] * mat_to[3]:   # mặt chính: rõ nhất × to nhất
+                    mat_to = (x, y, w, h, s)
             n += 1
         return np.clip(g / max(1, n) - self.nen_tb, 0, None) + mat_hop, mat_to
 
